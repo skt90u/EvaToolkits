@@ -32,6 +32,7 @@ namespace EvaToolkits_cli
     {
         static void Main(string[] args)
         {
+            DateTime.Now
             //List<string> b = a.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
             //string c = b[0];
             //Console.WriteLine(c);
