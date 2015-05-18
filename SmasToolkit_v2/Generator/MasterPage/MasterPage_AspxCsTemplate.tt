@@ -1,0 +1,88 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter name="masterConfig" type="SmasToolkit_v2.MasterPageGeneratorConfig" #>
+<#@ parameter name="detailConfig" type="SmasToolkit_v2.DetailPageGeneratorConfig" #>
+<# 
+    var PageId = masterConfig.PageId;
+    var PageCategory = Utils.GetPageCategory(PageId);
+    var Buttons = masterConfig.Buttons;
+    var QueryConditions = masterConfig.QueryConditions;
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using SMAS.CustomComponent;
+using System.Web.Services;
+using Newtonsoft.Json;
+using System.Data;
+using System.Collections;
+using DDSC.OracleADO;
+
+namespace SMAS.MainWebAP.<#= PageCategory #>
+{
+    public partial class <#= PageId #> : SMAS.MainWebAP.Common.BasePage
+    {
+        //帶到下一頁的按鈕類型
+        public string g_ButtonType = "";
+
+        /// <summary>
+        /// Page_Load 事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            ArrayList m_ArrayList = new ArrayList();
+            //紀錄Grid裡面的Key用於傳遞到維護頁
+            if (Session["<#= PageId #>"] != null)
+            {
+                m_ArrayList = SetKey("<#= PageId #>");
+                g_GridKey = (Dictionary<string, string>)m_ArrayList[1];
+                g_ConditionKey = (Dictionary<string, string>)m_ArrayList[0];
+            }
+
+            string m_PageIndex = "1";
+            //判斷是否為維護頁導回來的頁面
+            if (Page.PreviousPage != null)
+            {
+
+                //把查詢條件回填
+                if (g_ConditionKey != null)
+                {
+					// TODO: 請根據實際控制項類型，作對應修改
+					<#
+					PushIndent("                    ");
+					foreach (var queryCondition in QueryConditions)
+					{
+						WriteLine("{0}.Text = g_ConditionKey[\"p_{1}\"].ToString();", queryCondition.GetInputId(), queryCondition.Name);
+					}
+					ClearIndent();
+					#>					
+                    //頁次
+                    m_PageIndex = g_ConditionKey["PageIndex"].ToString();
+                }
+                //執行搜尋功能
+                ClientScript.RegisterClientScriptBlock(this.GetType(), "btnSEARCH_Click", "<script language='javascript'>$(document).ready(function () { btnSEARCH_Click('" + m_PageIndex + "') }) </script>");
+            }
+        }
+		<#
+		PushIndent("		");
+		foreach (var button in Buttons)
+		{
+			if(button.ButtonType == ButtonTypes.btnSEARCH)continue;
+			WriteLine("");
+			WriteLine("protected void {0}_Click(object sender, EventArgs e)", button.Id);
+			WriteLine("{");
+			WriteLine("	g_ButtonType = \"{0}\";", button.g_ButtonType);
+			WriteLine("}");
+		}
+		ClearIndent();
+		#>
+    }
+}

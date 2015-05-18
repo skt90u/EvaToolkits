@@ -1,0 +1,89 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter name="masterConfig" type="SmasToolkit_v2.MasterPageGeneratorConfig" #>
+<#@ parameter name="detailConfig" type="SmasToolkit_v2.DetailPageGeneratorConfig" #>
+<# 
+    var PageId = detailConfig.PageId;
+    var ParentPageId = detailConfig.ParentPageId;
+    var PageCategory = Utils.GetPageCategory(PageId);
+
+    var Buttons = detailConfig.Buttons;
+    var Columns = detailConfig.Columns;
+
+    var MasterSql = masterConfig.Sql;
+    var MasterDetailSql = masterConfig.DetailSql;
+    var MasterSqlLines = Utils.GetFormattedSqlLines(MasterSql);
+    var MasterSqlFields = Utils.GetFields(MasterSql);
+    var MasterDetailSqlLines = Utils.GetFormattedSqlLines(MasterDetailSql);
+    
+    var DetailTableName = detailConfig.TableName;
+
+    var FetchDataSql = Utils.GenerateFetchDataSql(masterConfig, detailConfig);
+    var FetchDataSqlLines = Utils.GetFormattedSqlLines(FetchDataSql);
+#>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="<#= PageId #>.aspx.cs" Inherits="SMAS.MainWebAP.<#= PageCategory #>.<#= PageId #>" %>
+<%@ Register TagPrefix="ddsc" Namespace="DDSC.CustomServerControl" Assembly="DDSC.CustomServerControl" %>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=9" />
+    <title>Service Material Administration System</title>
+    <link href="../styles/style.css" rel="stylesheet" type="text/css" />
+    <link href="../Styles/reset.css" rel="stylesheet" />
+    <script src="../Scripts/jquery-1.8.3.js"></script>
+    <script src="../Scripts/ErrHandler.js"></script>
+    <script src="../Scripts/BlockUI.js"></script>
+    <script src="js/<#= PageId #>.js"></script>
+</head>
+<body bgcolor="#e7eef4">
+<form id="form1" runat="server">
+<div id="Wrapper">
+<div id="pageTop">
+	<div class="TitleName01">
+		<asp:Label ID="lbl<#= ParentPageId #>" runat="server" Text=""></asp:Label>-<#= PageId #>
+	</div>
+    <div class="linespace">
+		<div>
+			<input id="hidACT_TYPE" runat="server" type="hidden" />
+			<#
+			PushIndent("			");
+			foreach (var button in Buttons)
+			{
+				WriteLine(button.RenderHtml());
+			}
+			ClearIndent();
+			#>
+		</div>
+        <div class="round">
+            <asp:Panel ID="Details" runat="server">
+                <div class="divMain">
+                    <table border="0" align="center" cellpadding="5" cellspacing="1" class="table01" style="margin-top: 20px; width: 98%">
+						<#
+						PushIndent("                        ");
+						foreach (var column in Columns)
+						{
+							WriteLine("<tr>");
+							WriteLine("	<td>");
+							WriteLine("		{0}", column.RenderLabel());
+							WriteLine("	</td>");
+							WriteLine("	<td>");
+							WriteLine("		{0}", column.RenderHtml());
+							WriteLine("	</td>");
+							WriteLine("</tr>");
+						}
+						ClearIndent();
+						#>
+                    </table>
+                </div>
+            </asp:Panel>
+        </div>
+    </div>
+</div><!-- pageTop -->
+</div><!-- Wrapper --> 
+</form>
+</body>
+</html>

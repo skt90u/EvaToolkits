@@ -1,0 +1,448 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter name="config" type="SmasToolkit.DetailPageGeneratorConfig" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Text;
+using System.Collections;
+using DDSC.OracleADO;
+using System.Data;
+
+namespace SMAS.MainWebAP.<#= Utils.GetPageCategory(config.PageId) #>
+{
+    public partial class <#= config.PageId #> : SMAS.MainWebAP.Common.BasePage
+    {
+        const bool bSupportHelp = true;
+
+        #region Page_Load
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!Page.IsPostBack)
+                {
+                    // 初始化控制項(例如: DropDownList, RadioButtonList, ...)
+
+                    // 如果沒有前一頁(或者前一頁不為<#= config.ParentPageId #>)，就忽略後續動作
+                    <#= config.ParentPageId #> previousPage = Page.PreviousPage as <#= config.ParentPageId #>;
+                    if (previousPage == null)
+                    {
+			            <#
+				            PushIndent("                        ");
+
+				            foreach (var button in config.Buttons)
+				            {
+					            WriteLine(button.RenderVisibility(""));
+				            }
+						
+				            ClearIndent();
+			            #>
+                        return;
+                    }
+
+                    string buttonType = (previousPage.g_ButtonType ?? string.Empty).Trim().ToUpper();
+                    ViewState["Action"] = buttonType;
+                    hidACT_TYPE.Value = buttonType;
+
+                    // 當使用者操作為 [新增]，則不載入任何資料
+                    if (buttonType.ToString() != "ADD") 
+                    {
+                        // 根據前一頁選取內容，將相關資料載入到對應控制項
+                        LoadData(previousPage);
+                    }
+                    
+                    // 根據前一頁選取動作，設定控制項是否可編輯或者唯讀
+                    switch (buttonType)
+                    {
+                        <#
+                            List<string> buttonTypes = new List<string> { 
+                                "ADD", 
+                                "UPD", 
+                                "DEL", 
+                                "COPY", 
+                                "QRY"
+                            };                           
+                            
+                            PushIndent("                        ");
+
+                            foreach (var buttonType in buttonTypes)
+                            {
+                                WriteLine("case \"{0}\":", buttonType);
+                                WriteLine("    // 顯示隱藏按鈕");
+                                foreach (var button in config.Buttons)
+				                {
+					                WriteLine("    " + button.RenderVisibility(buttonType));
+				                }
+                                WriteLine("    // 設定控制項是否可讀寫");
+		                        foreach (var column in config.Columns)
+		                        {
+                                    string str = column.RenderWritablity(buttonType);
+                                    if(!string.IsNullOrEmpty(str))
+			                            WriteLine("    " + str);
+		                        }
+                                WriteLine("    // 設定控制項初始值");
+		                        foreach (var column in config.Columns)
+		                        {
+                                    string str = column.RenderInitValue(buttonType);
+                                    if(!string.IsNullOrEmpty(str))
+			                            WriteLine("    " + str);
+		                        }
+                                WriteLine("    break;");
+                                WriteLine("");
+                            }
+
+                            ClearIndent();
+                        #>
+                        default:
+                            throw new Exception(string.Format("Page_Load, 尚未處理當 buttonType = {0}對應的動作", buttonType));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                showException(string.Format("{0}, StackTrace: {1}", ex.Message, ex.StackTrace.ToString()));
+            }
+        }
+
+        #region GetParams
+        /// <summary>
+        /// 改善原本參數塞入的方式
+        /// </summary>
+        private ArrayList GetParams(dbAccess dba, string sql, Dictionary<string, string> dict)
+        {
+            List<string> sqlParams = sql.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Where(t => t.Trim().StartsWith(":"))
+                                        .Select(t => t.Trim().Substring(1).ToUpper())
+                                        .ToList();
+
+            ArrayList arrParam = new ArrayList();
+
+            foreach (var key in dict.Keys)
+            {
+                if (sqlParams.Contains(key))
+                {
+                    arrParam.Add(dba.GetOracleParam(":" + key, dict[key]));
+                }
+            }
+
+            return arrParam;
+        }
+        #endregion
+        #region FetchData
+        private DataTable FetchData(<#= config.ParentPageId #> previousPage)
+        {
+            if (previousPage == null) throw new ArgumentNullException("previousPage");
+            if (previousPage.g_GridKey == null) throw new ArgumentNullException("previousPage.g_GridKey");
+
+            // (1) 定義傳入參數
+            Dictionary<string, string> dictParams = new Dictionary<string, string>(previousPage.g_GridKey);
+            <#
+                PushIndent("            ");
+
+				foreach (var field in SqlUtils.GetFields(config.MasterConfig.SearchSql))
+				{
+                    WriteLine("string {0} = dictParams[\"{0}\"];", field);
+				}
+                
+                ClearIndent();
+            #>
+
+            // (2) 組合SQL
+            StringBuilder sb = new StringBuilder();
+            <#
+                PushIndent("            ");
+
+                string sql = SqlUtils.GenerateFetchDataSql(config);
+	
+				foreach (var aSqlLine in SqlUtils.GetFormattedSqlLines(sql))
+				{
+					WriteLine("sb.Append(\" {0}\");", aSqlLine);
+				}             
+   
+                ClearIndent();
+            #>
+            
+            // (3) 根據組合SQL判斷實際要加入的參數
+            dbAccess dba = new dbAccess();
+            ArrayList arrParam = GetParams(dba, sb.ToString(), dictParams);
+
+            // (4) 查詢資料
+            DataSet ds = dba.runExecuteQuery("FetchData", sb.ToString(), arrParam);
+            if (ErrorCtrl(ds))
+            {
+                return ds.Tables["FetchData"];
+            }
+            else
+            {
+                ClientScript.RegisterClientScriptBlock(this.GetType(), "Result", "<script language='javascript'> $(document).ready(function () { alert('此筆資料已被刪除，請重新選擇！'); $('#btnExit')[0].click(); }); </script>");
+                return null;
+            }
+        }
+        #endregion
+        #region LoadData
+        /// <summary>
+        /// 根據前一頁面所選條件，將相關資料載入到對應控制項
+        /// </summary>
+        /// <param name="p_FORWARDER_NO"></param>
+        /// <returns></returns>
+        private void LoadData(<#= config.ParentPageId #> previousPage)
+        {
+            DataTable dt = FetchData(previousPage);
+
+            if (dt == null) return;
+            SetCtrlValue(this.Details, dt);
+
+            // TODO: 如果有SetCtrlValue無法設定的控制項，請在此手動設定
+        }
+        #endregion
+
+        #endregion
+
+        #region btnSave_Click
+
+        /// <summary>
+        /// 儲存
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void btnSave_Click(object sender, EventArgs e)
+        {
+            string buttonType = Convert.ToString(ViewState["Action"] ?? "NULL").Trim().ToUpper();
+
+            try
+            {
+                DataSet result = null;
+
+                switch (buttonType)
+                {
+                    case "ADD":
+                        result = DoAdd();
+                        break;
+
+                    case "UPD":
+                        result = DoUpdate();
+                        break;
+
+                    case "DEL":
+                        result = DoDelete();
+                        break;
+
+                    case "COPY":
+                        result = DoCopy();
+                        break;
+
+                    default:
+                        throw new Exception(string.Format("btnSave_Click, 尚未處理當 buttonType = {0} 對應的動作", buttonType));
+                }
+
+                // 寫入script至client端
+                regScript(result, buttonType);
+            }
+            catch (Exception ex)
+            {
+                showException(string.Format("{0}, StackTrace: {1}", ex.Message, ex.StackTrace.ToString()));
+            }
+        }
+
+        #region DoAdd
+        private DataSet DoAdd()
+        {
+            string action = "ADD";
+
+            ddscDataSet ddscDs = new ddscDataSet();
+
+            ddscDataTable ddscDt = ddscDs.createDataTable("<#= config.TableName #>");
+
+            ddscDt.addNewRow();
+            ddscDt.setColumnValue("action", "string", action);
+
+            // 設定使用者輸入內容
+            <#
+                PushIndent("            ");
+
+                foreach (var column in config.Columns)
+                {
+                    if(column.Name == "UPD_ID" ||
+                       column.Name == "UPD_DATE" ||
+                       column.Name == "UPD_TIME" ||
+                       column.Name == "CRT_ID" ||
+                       column.Name == "CRT_DATE" ||
+                       column.Name == "CRT_TIME")continue;
+
+                    WriteLine("ddscDt.setColumnValue(\"{0}\", \"string\", {1}.Text.Trim());", column.Name, column.GetInputId());
+                }
+
+                ClearIndent();
+            #>
+            // 設定[更新者]、[更新日期]、[更新時間]
+            ddscDt.setColumnValue("UPD_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("UPD_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("UPD_TIME", "string", SystemTime);
+            // 設定[建檔者]、[建檔日期]、[建檔時間]
+            ddscDt.setColumnValue("CRT_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("CRT_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("CRT_TIME", "string", SystemTime);
+            
+            ddscDs.addddscDataTable(ddscDt);
+
+            DataBase dataBase = new DataBase();
+            return dataBase.AdditionParameter(ddscDs);
+        }
+        #endregion
+
+        #region DoUpdate
+        private DataSet DoUpdate()
+        {
+            string action = "UPD";
+
+            ddscDataSet ddscDs = new ddscDataSet();
+
+            ddscDataTable ddscDt = ddscDs.createDataTable("<#= config.TableName #>");
+
+            ddscDt.addNewRow();
+            ddscDt.setColumnValue("action", "string", action);
+
+            // 設定使用者輸入內容
+            <#
+                PushIndent("            ");
+
+                foreach (var column in config.Columns)
+                {
+                    if(column.Name == "UPD_ID" ||
+                       column.Name == "UPD_DATE" ||
+                       column.Name == "UPD_TIME" ||
+                       column.Name == "CRT_ID" ||
+                       column.Name == "CRT_DATE" ||
+                       column.Name == "CRT_TIME")continue;
+
+                    WriteLine("ddscDt.setColumnValue(\"{0}\", \"string\", {1}.Text.Trim());", column.Name, column.GetInputId());
+                }
+
+                ClearIndent();
+            #>
+            // 設定[更新者]、[更新日期]、[更新時間]
+            ddscDt.setColumnValue("UPD_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("UPD_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("UPD_TIME", "string", SystemTime);
+
+            // 將主鍵值欄位加入Where條件
+            <#
+                PushIndent("            ");
+
+                foreach (var column in config.Columns)
+                {
+                    if(!column.IsPrimaryKey)continue;
+
+                    WriteLine("ddscDt.setWhereValue(\"{0}\", {1}.Text.Trim());", column.Name, column.GetInputId());
+                }
+
+                ClearIndent();
+            #>
+
+            ddscDs.addddscDataTable(ddscDt);
+
+            DataBase dataBase = new DataBase();
+            return dataBase.AdditionParameter(ddscDs);
+        }
+        #endregion
+
+        #region DoDelete
+        private DataSet DoDelete()
+        {
+            string action = "DEL";
+
+            ddscDataSet ddscDs = new ddscDataSet();
+
+            ddscDataTable ddscDt = ddscDs.createDataTable("<#= config.TableName #>");
+
+            ddscDt.addNewRow();
+            ddscDt.setColumnValue("action", "string", action);
+
+            // 將主鍵值欄位加入Where條件
+            <#
+                PushIndent("            ");
+
+                foreach (var column in config.Columns)
+                {
+                    if(!column.IsPrimaryKey)continue;
+
+                    WriteLine("ddscDt.setWhereValue(\"{0}\", {1}.Text.Trim());", column.Name, column.GetInputId());
+                }
+
+                ClearIndent();
+            #>
+
+            ddscDs.addddscDataTable(ddscDt);
+
+            DataBase dataBase = new DataBase();
+            return dataBase.AdditionParameter(ddscDs);
+        }
+        #endregion
+
+        #region DoCopy
+        private DataSet DoCopy()
+        {
+            string action = "COPY";
+
+            ddscDataSet ddscDs = new ddscDataSet();
+
+            ddscDataTable ddscDt = ddscDs.createDataTable("<#= config.TableName #>");
+
+            ddscDt.addNewRow();
+            ddscDt.setColumnValue("action", "string", action);
+
+            // 設定使用者輸入內容
+            <#
+                PushIndent("            ");
+
+                foreach (var column in config.Columns)
+                {
+                    if(column.Name == "UPD_ID" ||
+                       column.Name == "UPD_DATE" ||
+                       column.Name == "UPD_TIME" ||
+                       column.Name == "CRT_ID" ||
+                       column.Name == "CRT_DATE" ||
+                       column.Name == "CRT_TIME")continue;
+
+                    WriteLine("ddscDt.setColumnValue(\"{0}\", \"string\", {1}.Text.Trim());", column.Name, column.GetInputId());
+                }
+
+                ClearIndent();
+            #>
+            // 設定[更新者]、[更新日期]、[更新時間]
+            ddscDt.setColumnValue("UPD_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("UPD_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("UPD_TIME", "string", SystemTime);
+            // 設定[建檔者]、[建檔日期]、[建檔時間]
+            ddscDt.setColumnValue("CRT_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("CRT_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("CRT_TIME", "string", SystemTime);
+
+            ddscDs.addddscDataTable(ddscDt);
+
+            DataBase dataBase = new DataBase();
+            return dataBase.AdditionParameter(ddscDs);
+        }
+        #endregion
+
+        /// <summary>
+        /// 刪除
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void btnDELETE_Click(object sender, EventArgs e)
+        {
+            btnSave_Click(null, null);
+        }
+
+        #endregion
+    }
+}

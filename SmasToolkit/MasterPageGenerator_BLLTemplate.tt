@@ -1,0 +1,196 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter name="config" type="SmasToolkit.MasterPageGeneratorConfig" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using SMAS.CustomComponent;
+using System.Web.Services;
+using Newtonsoft.Json;
+using System.Data.Objects;
+using System.Text;
+using System.Collections;
+using DDSC.OracleADO;
+using SMAS.MainWebAP.Common;
+using System.Xml;
+using System.Data;
+
+namespace SMAS.MainWebAP.<#= Utils.GetPageCategory(config.PageId) #>
+{
+    public partial class <#= config.PageId #> : BasePage
+    {
+        /// <summary>
+        /// 改善原本參數塞入的方式
+        /// </summary>
+        private static ArrayList GetParams(dbAccess dba, string sql, Dictionary<string, string> dict)
+        {
+            List<string> sqlParams = sql.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries)
+										.Where(t => t.Trim().StartsWith(":"))
+										.Select(t => t.Trim().Substring(1).ToUpper())
+										.ToList();
+
+            ArrayList arrParam = new ArrayList();
+
+            foreach(var key in dict.Keys)
+            {
+                if(sqlParams.Contains(key))
+                {
+                    arrParam.Add(dba.GetOracleParam(":" + key , dict[key]));
+                }
+            }
+
+            return arrParam;
+        }
+
+        /// <summary>
+        /// 主頁面, 當點選搜尋按鈕，查詢所需要顯示內容
+        /// </summary>
+        [WebMethod]
+        public static Object GetProgramADO(<#= string.Join(", ", config.QueryConditions.Select(hc => "string p_" + hc.Name)) #>, PageInfo p_PageInfo)
+        {
+            try
+            {
+                // (1) 定義傳入參數
+                Dictionary<string, string> dictParams = new Dictionary<string, string>();
+				<#
+					PushIndent("                ");
+
+					foreach (var hc in config.QueryConditions)
+					{
+						WriteLine("dictParams.Add(\"{0}\", p_{0});", hc.Name);
+					}
+
+					ClearIndent();
+				#>
+
+                // (2) 組合SQL
+                StringBuilder sb = new StringBuilder();
+				<#
+					PushIndent("				");
+
+					foreach (var aSqlLine in SqlUtils.GetFormattedSqlLines(config.SearchSql))
+					{
+						var hc = config.GetMatchedQueryCondition(aSqlLine, config.QueryConditions);
+
+						if(hc == null)
+						{
+							WriteLine("sb.Append(\" {0}\");", aSqlLine);
+						}
+						else
+						{
+							WriteLine("if (!string.IsNullOrEmpty(p_{0}))", hc.Name);
+							WriteLine("{");
+							WriteLine("	sb.Append(\" {0}\");", aSqlLine);
+							WriteLine("}");
+						}
+					}
+
+					ClearIndent();
+				#>
+
+                // (3) 根據組合SQL判斷實際要加入的參數
+                dbAccess dba = new dbAccess();
+                ArrayList arrParam = GetParams(dba, sb.ToString(), dictParams);
+
+                // (4) 查詢資料
+                FunctionHandler handler = new FunctionHandler();
+                return handler.ADOGridHandler(sb, arrParam, p_PageInfo);
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+		/// <summary>
+        /// 主頁面, 當點選三角形圖示，查詢所需要顯示內容
+        /// </summary>
+        [WebMethod]
+		public static Object QueryDetl(<#= string.Join(", ", SqlUtils.GetFields(config.SearchSql).Select(field => "string p_" + field)) #>)
+        {
+            // (1) 定義傳入參數
+            Dictionary<string, string> dictParams = new Dictionary<string, string>();
+			<#
+				PushIndent("            ");
+
+				foreach (var field in SqlUtils.GetFields(config.SearchSql))
+				{
+					WriteLine("dictParams.Add(\"{0}\", p_{0});", field);
+				}
+
+				ClearIndent();
+			#>
+
+            // (2) 組合SQL
+            StringBuilder sb = new StringBuilder();
+			<#
+				PushIndent("            ");
+
+				foreach (var aSqlLine in SqlUtils.GetFormattedSqlLines(config.SearchDetailSql))
+				{
+					WriteLine("sb.Append(\" {0}\");", aSqlLine);
+				}
+
+				ClearIndent();
+			#>
+
+            // (3) 根據組合SQL判斷實際要加入的參數
+            dbAccess dba = new dbAccess();
+            ArrayList arrParam = GetParams(dba, sb.ToString(), dictParams);
+
+            // (4) 查詢資料
+            DataSet ds = dba.runExecuteQuery("QueryDetl", sb.ToString(), arrParam);
+            if ((ds.Tables["info"].Rows[0]["ReturnCode"].ToString() != "100" && ds.Tables["info"].Rows[0]["ReturnCode"].ToString() != "999"))
+                return dba.RowsToDictionary(ds.Tables["QueryDetl"], null, null);
+            else
+                return dba.RowsToDictionary(ds.Tables["info"], null, null);
+        }
+
+        /// <summary>
+        /// 檢查主鍵值是否重複
+        /// </summary>
+        [WebMethod]
+        public static bool DoesDataAlreadyExist(<#= string.Join(", ", config.DetailConfig.Columns.Select(col=>"string p_" +  col.Name).ToList()) #>)
+        {
+            // (1) 定義傳入參數
+            Dictionary<string, string> dictParams = new Dictionary<string, string>();
+			<#
+				PushIndent("            ");
+
+				foreach (var field in config.DetailConfig.Columns.Select(col=> col.Name))
+				{
+					WriteLine("dictParams.Add(\"{0}\", p_{0});", field);
+				}
+
+				ClearIndent();
+			#>
+
+            // (2) 組合SQL
+            StringBuilder sb = new StringBuilder();
+			<#
+				PushIndent("            ");
+
+				foreach (var aSqlLine in SqlUtils.GetFormattedSqlLines(SqlUtils.GenerateDoesDataAlreadyExistSql(config.DetailConfig)))
+				{
+					WriteLine("sb.Append(\" {0}\");", aSqlLine);
+				}
+
+				ClearIndent();
+			#>
+
+            // (3) 根據組合SQL判斷實際要加入的參數
+            dbAccess dba = new dbAccess();
+            ArrayList arrParam = GetParams(dba, sb.ToString(), dictParams);
+
+            // (4) 查詢資料
+            DataSet ds = dba.runExecuteQuery("DoesDataAlreadyExist", sb.ToString(), arrParam);
+            return ds.Tables["info"].Rows[0]["ReturnCode"].ToString() == "000"; 
+        }
+    }
+}

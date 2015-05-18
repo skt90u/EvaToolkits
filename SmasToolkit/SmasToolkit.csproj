@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4CC21AE3-AD2B-4848-88EF-C05CF2B22E55}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SmasToolkit</RootNamespace>
+    <AssemblyName>SmasToolkit</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="gudusoft.gsqlparser">
+      <HintPath>lib\gudusoft.gsqlparser.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Button.cs" />
+    <Compile Include="DetailPageGenerator.cs" />
+    <Compile Include="DetailPageGeneratorConfig.cs" />
+    <Compile Include="DetailPageGenerator_AspxCsTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DetailPageGenerator_AspxCsTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DetailPageGenerator_AspxTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DetailPageGenerator_AspxTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DetailPageGenerator_BLLTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DetailPageGenerator_BLLTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DetailPageGenerator_JavascriptTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DetailPageGenerator_JavascriptTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="IGenerator.cs" />
+    <Compile Include="MasterPageConfig.cs" />
+    <Compile Include="MasterPageGenerator.cs" />
+    <Compile Include="MasterPageGeneratorConfig.cs" />
+    <Compile Include="MasterPageGenerator_AspxCsTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MasterPageGenerator_AspxCsTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MasterPageGenerator_AspxTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MasterPageGenerator_AspxTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MasterPageGenerator_BLLTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MasterPageGenerator_BLLTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="MasterPageGenerator_JavascriptTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MasterPageGenerator_JavascriptTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PageGenerator.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlUtils.cs" />
+    <Compile Include="StringExtensions.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="HtmlControl.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DetailPageGenerator_AspxCsTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DetailPageGenerator_AspxCsTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="DetailPageGenerator_AspxTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DetailPageGenerator_AspxTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="DetailPageGenerator_BLLTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DetailPageGenerator_BLLTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="DetailPageGenerator_JavascriptTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>DetailPageGenerator_JavascriptTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="MasterPageGenerator_AspxCsTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MasterPageGenerator_AspxCsTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="MasterPageGenerator_AspxTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MasterPageGenerator_AspxTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="MasterPageGenerator_BLLTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MasterPageGenerator_BLLTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="MasterPageGenerator_JavascriptTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>MasterPageGenerator_JavascriptTemplate.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="HTMLPage1.html" />
+    <Content Include="TODO.txt" />
+    <Content Include="複製 - BASM0071.js" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

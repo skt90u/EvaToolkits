@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmasToolkit", "SmasToolkit\SmasToolkit.csproj", "{4CC21AE3-AD2B-4848-88EF-C05CF2B22E55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvaToolkits-cli", "EvaToolkits-cli\EvaToolkits-cli.csproj", "{8CD07A2E-AB2F-4937-89B8-C6C1F77DE70F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartTestSchema", "SmartTestSchema\SmartTestSchema.csproj", "{64E8E202-4484-41DB-9F30-137A16073091}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmasToolkit_v2", "SmasToolkit_v2\SmasToolkit_v2.csproj", "{E8F2F32C-CFC0-4643-BF97-2521CABE178B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvaToolkits", "EvaToolkits\EvaToolkits.csproj", "{C49B6838-3420-41E3-8B26-0BC3D0CBF51A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4CC21AE3-AD2B-4848-88EF-C05CF2B22E55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CC21AE3-AD2B-4848-88EF-C05CF2B22E55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CC21AE3-AD2B-4848-88EF-C05CF2B22E55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CC21AE3-AD2B-4848-88EF-C05CF2B22E55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CD07A2E-AB2F-4937-89B8-C6C1F77DE70F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CD07A2E-AB2F-4937-89B8-C6C1F77DE70F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CD07A2E-AB2F-4937-89B8-C6C1F77DE70F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CD07A2E-AB2F-4937-89B8-C6C1F77DE70F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64E8E202-4484-41DB-9F30-137A16073091}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64E8E202-4484-41DB-9F30-137A16073091}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64E8E202-4484-41DB-9F30-137A16073091}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64E8E202-4484-41DB-9F30-137A16073091}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8F2F32C-CFC0-4643-BF97-2521CABE178B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8F2F32C-CFC0-4643-BF97-2521CABE178B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8F2F32C-CFC0-4643-BF97-2521CABE178B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8F2F32C-CFC0-4643-BF97-2521CABE178B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C49B6838-3420-41E3-8B26-0BC3D0CBF51A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C49B6838-3420-41E3-8B26-0BC3D0CBF51A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C49B6838-3420-41E3-8B26-0BC3D0CBF51A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C49B6838-3420-41E3-8B26-0BC3D0CBF51A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

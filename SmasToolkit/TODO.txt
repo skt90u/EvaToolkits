@@ -1,0 +1,6 @@
+﻿DetailPageGenerator_AspxCsTemplate.tt
+DetailPageGenerator_AspxTemplate.tt
+DetailPageGenerator_BLLTemplate.tt
+DetailPageGenerator_JavascriptTemplate.tt
+
+http://localhost/SMASWebAP/BAS/BASM0070.aspx?d=1430291144411

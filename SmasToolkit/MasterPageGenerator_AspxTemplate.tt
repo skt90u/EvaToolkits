@@ -1,0 +1,90 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter name="config" type="SmasToolkit.MasterPageGeneratorConfig" #>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="<#= config.PageId #>.aspx.cs" Inherits="SMAS.MainWebAP.<#= Utils.GetPageCategory(config.PageId) #>.<#= config.PageId #>" %>
+<%@ Register TagPrefix="ddsc" Namespace="DDSC.CustomServerControl" Assembly="DDSC.CustomServerControl" %>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head" runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=9" />
+    <title></title>
+    <link href="../styles/style.css" rel="stylesheet" type="text/css" />
+    <link href="../Styles/jquery-ui.css" rel="stylesheet" />
+    <link href="../Styles/reset.css" rel="stylesheet" type="text/css" />
+    <script src="../Scripts/jquery-1.8.3.js"></script>
+    <script src="../Scripts/FunctionHander.js"></script>
+    <script src="../Scripts/scroll.js"></script>
+    <script src="../Scripts/GridDataBind.js"></script>
+    <script src="../Scripts/BlockUI.js"></script>
+    <script src="../Scripts/jquery-ui.js"></script>
+    <script src="js/<#= config.PageId #>.js"></script>
+    <style type="text/css">
+        #ProgramPageIndex {width: 28px;}
+    </style>
+</head>
+<body bgcolor="#e7eef4">
+    <form id="form1" runat="server">
+        <div id="Wrapper">
+            <div id="pageTop">
+                <div class="Navgation"><asp:Label ID="User_Info" runat="server" Text=""></asp:Label></div>
+                <div class="TitleName01"><asp:Label ID="lbl<#= config.PageId #>" runat="server" Text=""></asp:Label>-<#= config.PageId #></div>
+                <div class="linespace">
+                  <div>
+					<#
+						PushIndent("					");
+
+						foreach (var button in config.Buttons)
+						{
+							WriteLine(button.RenderMasterAspx());
+						}
+						
+						ClearIndent();
+					#>
+                  </div>
+                    <div class="round">
+                        <table border="0" align="center" cellpadding="5" class="table01" style="width: 98%; margin-top: 20px;">
+							<#
+								PushIndent("							");
+
+								foreach (var hc in config.QueryConditions)
+								{
+									WriteLine("<tr>");
+									WriteLine("	<td>");
+									WriteLine("		{0}", hc.RenderLabel());
+									WriteLine("	</td>");
+									WriteLine("	<td>");
+									WriteLine("		{0}", hc.RenderInput());
+									WriteLine("	</td>");
+									WriteLine("</tr>");
+									//WriteLine(queryCondition.RenderAspx());
+								}
+
+								ClearIndent();
+							#>
+                        </table>
+                    </div>
+                    <div class="round">
+                        <div style="position: relative; width: 100%; height: 400px;" onclick='GridEventHandler(event,this.id);' class="Program" id="Program"></div>
+                        <%--換頁區塊--%>
+                    </div>
+					<#= config.RenderGridTableFooter() #>
+                        <div id="ProgramPageInfo" class="moretxt" style="width: 50%; text-align: left"></div>
+                        <div id="Span1" style="width: 100%; text-align: right">
+                            <input type="button" id="ProgrambtnFirst" value="第一頁" class="BtnOn" />
+                            <input type="button" id="ProgrambtnPrev" value="上一頁" class="BtnOn" />
+                            <span id="ProgramPages"></span>
+                            <input type="button" id="ProgrambtnNext" value="下一頁" class="BtnOn" />
+                            <input type="button" id="ProgrambtnLast" value="最後頁" class="BtnOn" />
+                            &#160;<label id="lblGO_TO1">Go to</label>&#160;<input type="text" id="ProgramPageIndex" class="width_4" maxlength="4" value="" />
+                            <input type="button" id="ProgrambtnGoto" class="BtnOn" value="GO" class="btn_Go" name="Go" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

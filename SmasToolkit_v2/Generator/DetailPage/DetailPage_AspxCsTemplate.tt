@@ -1,0 +1,629 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter name="masterConfig" type="SmasToolkit_v2.MasterPageGeneratorConfig" #>
+<#@ parameter name="detailConfig" type="SmasToolkit_v2.DetailPageGeneratorConfig" #>
+<# 
+    var PageId = detailConfig.PageId;
+    var ParentPageId = detailConfig.ParentPageId;
+    var PageCategory = Utils.GetPageCategory(PageId);
+
+    var Buttons = detailConfig.Buttons;
+    var Columns = detailConfig.Columns;
+
+    var MasterSql = masterConfig.Sql;
+    var MasterDetailSql = masterConfig.DetailSql;
+    var MasterSqlLines = Utils.GetFormattedSqlLines(MasterSql);
+    var MasterSqlFields = Utils.GetFields(MasterSql);
+    var MasterDetailSqlLines = Utils.GetFormattedSqlLines(MasterDetailSql);
+    
+    var DetailTableName = detailConfig.TableName;
+
+    var FetchDataSql = Utils.GenerateFetchDataSql(masterConfig, detailConfig);
+    var FetchDataSqlLines = Utils.GetFormattedSqlLines(FetchDataSql);
+    var FetchDataSqlFields = Utils.GetFields(FetchDataSql);
+
+    var bSupportHelp = detailConfig.SupportHelp ? "true" : "false";
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Text;
+using System.Collections;
+using DDSC.OracleADO;
+using System.Data;
+
+namespace SMAS.MainWebAP.<#= PageCategory #>
+{
+    public partial class <#= PageId #> : SMAS.MainWebAP.Common.BasePage
+    {
+        const bool bSupportHelp = <#= bSupportHelp #>;
+
+        #region Page_Load
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!Page.IsPostBack)
+                {
+                    // 初始化控制項(例如: DropDownList, RadioButtonList, ...)
+
+                    // 如果沒有前一頁(或者前一頁不為<#= ParentPageId #>)，就忽略後續動作
+                    <#= ParentPageId #> previousPage = Page.PreviousPage as <#= ParentPageId #>;
+                    if (previousPage == null)
+                    {
+			            <#
+				        PushIndent("                        ");
+				        foreach (var button in Buttons)
+				        {
+					        WriteLine(button.RenderVisibility(string.Empty));
+				        }
+				        ClearIndent();
+			            #>
+                        return;
+                    }
+
+                    string buttonType = (previousPage.g_ButtonType ?? string.Empty).Trim().ToUpper();
+                    ViewState["Action"] = buttonType;
+                    hidACT_TYPE.Value = buttonType;
+
+                    // 當使用者操作為 [新增]，則不載入任何資料
+                    if (buttonType.ToString() != "ADD") 
+                    {
+                        // 根據前一頁選取內容，將相關資料載入到對應控制項
+                        LoadData(previousPage);
+                    }
+                    
+                    // 根據前一頁選取動作，設定控制項是否可編輯或者唯讀
+                    switch (buttonType)
+                    {
+                        <#
+                        List<string> buttonTypes = new List<string> { 
+                            "ADD", 
+                            "UPD", 
+                            "DEL", 
+                            "COPY", 
+                            "QRY"
+                        };                           
+                        PushIndent("                        ");
+                        foreach (var buttonType in buttonTypes)
+                        {
+                            WriteLine("case \"{0}\":", buttonType);
+                            WriteLine("    // 顯示隱藏按鈕");
+                            foreach (var button in Buttons)
+				            {
+					            WriteLine("    " + button.RenderVisibility(buttonType));
+				            }
+                            WriteLine("    // 設定控制項是否可讀寫");
+		                    foreach (var column in Columns)
+		                    {
+                                string str = column.RenderWritablity(buttonType);
+                                if(!string.IsNullOrEmpty(str))
+			                        WriteLine("    " + str);
+		                    }
+                            WriteLine("    // 設定控制項初始值");
+		                    foreach (var column in Columns)
+		                    {
+                                string str = column.RenderInitValue(buttonType);
+                                if(!string.IsNullOrEmpty(str))
+			                        WriteLine("    " + str);
+		                    }
+                            WriteLine("    break;");
+                            WriteLine("");
+                        }
+                        ClearIndent();
+                        #>
+                        default:
+                            throw new Exception(string.Format("Page_Load, 尚未處理當 buttonType = {0}對應的動作", buttonType));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                showException(string.Format("{0}, StackTrace: {1}", ex.Message, ex.StackTrace.ToString()));
+            }
+        }
+
+        #region GetParams
+        /// <summary>
+        /// 改善原本參數塞入的方式
+        /// </summary>
+        private ArrayList GetParams(dbAccess dba, string sql, Dictionary<string, string> dict)
+        {
+            List<string> sqlParams = sql.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Where(t => t.Trim().StartsWith(":"))
+                                        .Select(t => t.Trim().Substring(1).ToUpper())
+                                        .ToList();
+
+            ArrayList arrParam = new ArrayList();
+
+            foreach (var key in dict.Keys)
+            {
+                if (sqlParams.Contains(key))
+                {
+                    arrParam.Add(dba.GetOracleParam(":" + key, dict[key]));
+                }
+            }
+
+            return arrParam;
+        }
+        #endregion
+        #region FetchData
+        private DataTable FetchData(<#= ParentPageId #> previousPage)
+        {
+            if (previousPage == null) throw new ArgumentNullException("previousPage");
+            if (previousPage.g_GridKey == null) throw new ArgumentNullException("previousPage.g_GridKey");
+
+            // (1) 定義傳入參數
+            Dictionary<string, string> dictParams = new Dictionary<string, string>(previousPage.g_GridKey);
+            <#
+            PushIndent("            ");
+			foreach (var field in MasterSqlFields)
+			{
+                WriteLine("string {0} = dictParams[\"{0}\"];", field);
+			}
+            ClearIndent();
+            #>
+
+            // (2) 組合SQL
+            StringBuilder sb = new StringBuilder();
+            <#
+            PushIndent("            ");
+			foreach (var aSqlLine in FetchDataSqlLines)
+			{
+				WriteLine("sb.Append(\" {0}\");", aSqlLine);
+			}             
+            ClearIndent();
+            #>
+            
+            // (3) 根據組合SQL判斷實際要加入的參數
+            dbAccess dba = new dbAccess();
+            ArrayList arrParam = GetParams(dba, sb.ToString(), dictParams);
+
+            // (4) 查詢資料
+            DataSet ds = dba.runExecuteQuery("FetchData", sb.ToString(), arrParam);
+            if (ErrorCtrl(ds))
+            {
+                return ds.Tables["FetchData"];
+            }
+            else
+            {
+                ClientScript.RegisterClientScriptBlock(this.GetType(), "Result", "<script language='javascript'> $(document).ready(function () { alert('此筆資料已被刪除，請重新選擇！'); $('#btnExit')[0].click(); }); </script>");
+                return null;
+            }
+        }
+        #endregion
+        #region LoadData
+        /// <summary>
+        /// 根據前一頁面所選條件，將相關資料載入到對應控制項
+        /// </summary>
+        /// <param name="p_FORWARDER_NO"></param>
+        /// <returns></returns>
+        private void LoadData(<#= ParentPageId #> previousPage)
+        {
+            DataTable dt = FetchData(previousPage);
+            SaveToViewState(dt);
+
+            if (dt == null) return;
+            SetCtrlValue(this.Details, dt);
+
+            // TODO: 如果有SetCtrlValue無法設定的控制項，請在此手動設定
+        }
+
+        private void SaveToViewState(DataTable dt)
+        {
+            if (dt == null) return;
+            if (dt.Rows.Count == 0) return;
+
+            // column.ColumnName都是大寫，因此不使用以下邏輯
+            //foreach (DataColumn column in dt.Columns)
+            //    ViewState[column.ColumnName] = Convert.ToString(dt.Rows[0][column.ColumnName]);
+            
+            <#
+            PushIndent("            ");
+			foreach (var field in FetchDataSqlFields)
+			{
+				WriteLine("ViewState[\"{0}\"] = Convert.ToString(dt.Rows[0][\"{0}\"]);", field);
+			}             
+            ClearIndent();
+            #>
+        }
+
+        #endregion
+
+        #endregion
+
+        #region btnSave_Click
+
+        /// <summary>
+        /// 儲存
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void btnSave_Click(object sender, EventArgs e)
+        {
+            string buttonType = Convert.ToString(ViewState["Action"] ?? "NULL").Trim().ToUpper();
+
+            try
+            {
+                DataSet result = null;
+
+                switch (buttonType)
+                {
+                    case "ADD":
+                        result = DoAdd();
+                        break;
+
+                    case "UPD":
+                        result = DoUpdate();
+                        break;
+
+                    case "DEL":
+                        result = DoDelete();
+                        break;
+
+                    case "COPY":
+                        result = DoCopy();
+                        break;
+
+                    default:
+                        throw new Exception(string.Format("btnSave_Click, 尚未處理當 buttonType = {0} 對應的動作", buttonType));
+                }
+
+                // 寫入script至client端
+                MyRegScript(result, buttonType);
+            }
+            catch (Exception ex)
+            {
+                showException(string.Format("{0}, StackTrace: {1}", ex.Message, ex.StackTrace.ToString()));
+            }
+        }
+
+        #region DoAdd
+        private DataSet DoAdd()
+        {
+            string action = "ADD";
+
+            ddscDataSet ddscDs = new ddscDataSet();
+
+            ddscDataTable ddscDt = ddscDs.createDataTable("<#= DetailTableName #>");
+
+            ddscDt.addNewRow();
+            ddscDt.setColumnValue("action", "string", action);
+
+            // 設定使用者輸入內容
+            <#
+            PushIndent("            ");
+            foreach (var column in Columns)
+            {
+                if(column.Name == "UPD_ID" ||
+                    column.Name == "UPD_DATE" ||
+                    column.Name == "UPD_TIME" ||
+                    column.Name == "CRT_ID" ||
+                    column.Name == "CRT_DATE" ||
+                    column.Name == "CRT_TIME")continue;
+
+                WriteLine("ddscDt.setColumnValue(\"{0}\", \"string\", {1}.Text.Trim());", column.Name, column.GetInputId());
+            }
+            ClearIndent();
+            #>
+            // 設定[更新者]、[更新日期]、[更新時間]
+            ddscDt.setColumnValue("UPD_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("UPD_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("UPD_TIME", "string", SystemTime);
+            // 設定[建檔者]、[建檔日期]、[建檔時間]
+            ddscDt.setColumnValue("CRT_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("CRT_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("CRT_TIME", "string", SystemTime);
+            
+            ddscDs.addddscDataTable(ddscDt);
+
+            DataBase dataBase = new DataBase();
+            return dataBase.AdditionParameter(ddscDs);
+        }
+        #endregion
+
+        #region DoUpdate
+        private DataSet DoUpdate()
+        {
+            string action = "UPD";
+
+            ddscDataSet ddscDs = new ddscDataSet();
+
+            ddscDataTable ddscDt = ddscDs.createDataTable("<#= DetailTableName #>");
+
+            ddscDt.addNewRow();
+            ddscDt.setColumnValue("action", "string", action);
+
+            // 設定使用者輸入內容
+            <#
+            PushIndent("            ");
+            foreach (var column in Columns)
+            {
+                if(column.Name == "UPD_ID" ||
+                    column.Name == "UPD_DATE" ||
+                    column.Name == "UPD_TIME" ||
+                    column.Name == "CRT_ID" ||
+                    column.Name == "CRT_DATE" ||
+                    column.Name == "CRT_TIME")continue;
+
+                WriteLine("ddscDt.setColumnValue(\"{0}\", \"string\", {1}.Text.Trim());", column.Name, column.GetInputId());
+            }
+            ClearIndent();
+            #>
+            // 設定[更新者]、[更新日期]、[更新時間]
+            ddscDt.setColumnValue("UPD_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("UPD_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("UPD_TIME", "string", SystemTime);
+
+            // 將主鍵值欄位加入Where條件
+            <#
+            PushIndent("            ");
+            foreach (var column in Columns)
+            {
+                if(!column.IsPrimaryKey)continue;
+
+                WriteLine("ddscDt.setWhereValue(\"{0}\", {1}.Text.Trim());", column.Name, column.GetInputId());
+            }
+            ClearIndent();
+            #>
+
+            ddscDs.addddscDataTable(ddscDt);
+
+            DataBase dataBase = new DataBase();
+            return dataBase.AdditionParameter(ddscDs);
+        }
+        #endregion
+
+        #region DoDelete
+        private DataSet DoDelete()
+        {
+            string action = "DEL";
+
+            ddscDataSet ddscDs = new ddscDataSet();
+
+            ddscDataTable ddscDt = ddscDs.createDataTable("<#= DetailTableName #>");
+
+            ddscDt.addNewRow();
+            ddscDt.setColumnValue("action", "string", action);
+
+            // 將主鍵值欄位加入Where條件
+            <#
+                PushIndent("            ");
+
+                foreach (var column in Columns)
+                {
+                    if(!column.IsPrimaryKey)continue;
+
+                    WriteLine("ddscDt.setWhereValue(\"{0}\", {1}.Text.Trim());", column.Name, column.GetInputId());
+                }
+
+                ClearIndent();
+            #>
+
+            ddscDs.addddscDataTable(ddscDt);
+
+            DataBase dataBase = new DataBase();
+            return dataBase.AdditionParameter(ddscDs);
+        }
+        #endregion
+
+        #region DoCopy
+        private DataSet DoCopy()
+        {
+            string action = "COPY";
+
+            ddscDataSet ddscDs = new ddscDataSet();
+
+            ddscDataTable ddscDt = ddscDs.createDataTable("<#= DetailTableName #>");
+
+            ddscDt.addNewRow();
+            ddscDt.setColumnValue("action", "string", action);
+
+            // 設定使用者輸入內容
+            <#
+            PushIndent("            ");
+            foreach (var column in Columns)
+            {
+                if(column.Name == "UPD_ID" ||
+                    column.Name == "UPD_DATE" ||
+                    column.Name == "UPD_TIME" ||
+                    column.Name == "CRT_ID" ||
+                    column.Name == "CRT_DATE" ||
+                    column.Name == "CRT_TIME")continue;
+
+                WriteLine("ddscDt.setColumnValue(\"{0}\", \"string\", {1}.Text.Trim());", column.Name, column.GetInputId());
+            }
+            ClearIndent();
+            #>
+            // 設定[更新者]、[更新日期]、[更新時間]
+            ddscDt.setColumnValue("UPD_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("UPD_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("UPD_TIME", "string", SystemTime);
+            // 設定[建檔者]、[建檔日期]、[建檔時間]
+            ddscDt.setColumnValue("CRT_ID", "string", User.Identity.Name);
+            ddscDt.setColumnValue("CRT_DATE", "string", SystemDate);
+            ddscDt.setColumnValue("CRT_TIME", "string", SystemTime);
+
+            ddscDs.addddscDataTable(ddscDt);
+
+            DataBase dataBase = new DataBase();
+            return dataBase.AdditionParameter(ddscDs);
+        }
+        #endregion
+
+        /// <summary>
+        /// 刪除
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void btnDELETE_Click(object sender, EventArgs e)
+        {
+            btnSave_Click(null, null);
+        }
+
+        #endregion
+
+        private static string GetNextVal()
+        {
+            return GetNextVal("<#= DetailTableName #>", "SEQ", string.Empty, DateTime.Now, 7);
+        }
+
+        /// <summary>
+        /// 取得在指定資料表的特定欄位在特定日期中的NextVal
+        /// 
+        /// 格式：20151231000001
+        /// </summary>
+        private static string GetNextVal(string tableName, string columnName, string prefix, DateTime dateTime, int totalWidthOfSequence)
+        {
+            int maxValue = 0;
+
+            string yyyyMMdd = dateTime.ToString("yyyyMMdd");
+            string like = string.Format("{0}{1}%", prefix, yyyyMMdd);
+
+            dbAccess dba = new dbAccess();
+
+            // select max(columnName) as columnName from tableName where CRT_DATE = :CRT_DATE and columnName like 'prefix + dateTime + %'
+            StringBuilder sb = new StringBuilder();
+            sb.AppendFormat("SELECT MAX({0}) AS MAX_VALUE FROM {1} WHERE CRT_DATE = '{2}' AND {0} LIKE '{3}'", columnName, tableName, yyyyMMdd, like);
+
+            ArrayList arrParam = new ArrayList();
+            DataSet ds = dba.runExecuteQuery("GetNextVal", sb.ToString(), arrParam);
+
+            DataTable dt = ds.Tables["GetNextVal"];
+
+            if (dt.Rows.Count != 0)
+            {
+                string MAX_VALUE = dt.Rows[0]["MAX_VALUE"].ToString();
+
+                if (!string.IsNullOrEmpty(MAX_VALUE))
+                {
+                    int startIndex = prefix.Length + yyyyMMdd.Length;
+
+                    maxValue = Convert.ToInt32(MAX_VALUE.Substring(startIndex));
+                }
+            }
+
+            string nextValue = (maxValue + 1).ToString().PadLeft(totalWidthOfSequence, '0');
+
+            string result = string.Format("{0}{1}{2}", prefix, yyyyMMdd, nextValue);
+
+            return result;
+        }
+
+        #region MyRegScript
+        /// <summary>
+        /// 參考 BasePage.RegScript
+        /// </summary>
+        public void MyRegScript(DataSet ds, string action, string msg = "")
+        {
+            action = action.ToString().ToLower();
+
+            Employee OnUser = LoginUser();
+
+            string strResult = ds.Tables[0].Rows[0]["TransResult"].ToString();
+            string strMessage = ds.Tables[0].Rows[0]["Message"].ToString();
+
+            string strSuccess = string.Empty;
+            string strFail = string.Empty;
+            string strClose = string.Empty;
+
+            switch (action)
+            {
+                case "add":
+                    {
+                        switch (OnUser.UseLanguage)
+                        {
+                            case "zh-tw":
+                                strSuccess = "新增成功!";
+                                strFail = "新增失敗!\\n";
+                                break;
+                            case "zh-en":
+                                strSuccess = "ADD SUCCESS !";
+                                strFail = "ADD FAIL !\\n";
+                                break;
+                        }
+                    } break;
+
+                case "upd":
+                    {
+                        switch (OnUser.UseLanguage)
+                        {
+                            case "zh-tw":
+                                strSuccess = "修改成功!";
+                                strFail = "修改失敗!\\n";
+                                break;
+                            case "zh-en":
+                                strSuccess = "EDIT SUCCESS !";
+                                strFail = "EDIT FAIL !\\n";
+                                break;
+                        }
+                    } break;
+
+                case "del":
+                    {
+                        switch (OnUser.UseLanguage)
+                        {
+                            case "zh-tw":
+                                strSuccess = "刪除成功!";
+                                strFail = "刪除失敗!\\n";
+                                break;
+                            case "zh-en":
+                                strSuccess = "DELETE SUCCESS !";
+                                strFail = "DELETE FAIL !\\n";
+                                break;
+                        }
+                    } break;
+
+                case "copy":
+                    {
+                        switch (OnUser.UseLanguage)
+                        {
+                            case "zh-tw":
+                                strSuccess = "複製成功!";
+                                strFail = "複製失敗!\\n";
+                                break;
+                            case "zh-en":
+                                strSuccess = "COPY SUCCESS !";
+                                strFail = "COPY FAIL !\\n";
+                                break;
+                        }
+                    } break;
+
+                default:
+                    {
+                        switch (OnUser.UseLanguage)
+                        {
+                            case "zh-tw":
+                                strSuccess = "存檔成功!";
+                                strFail = "存檔失敗!\\n";
+                                break;
+                            case "zh-en":
+                                strSuccess = "SAVE SUCCESS !";
+                                strFail = "SAVE FAIL !\\n";
+                                break;
+                        }
+                    } break;
+            }
+
+            if ((strResult == "T"))
+            {
+                strClose = " Exit(); ";
+
+                ClientScript.RegisterClientScriptBlock(this.GetType(), "Result", "<script language=\"javascript\"> alert($('<div/>').html('" + HttpUtility.HtmlEncode(msg + strSuccess) + "').text());window.returnValue = true;" + HttpUtility.HtmlEncode(strClose) + " </script>");
+            }
+
+            if ((strResult == "F"))
+            {
+                ClientScript.RegisterClientScriptBlock(this.GetType(), "Result", "<script language=\"javascript\"> alert($('<div/>').html('" + HttpUtility.HtmlEncode(msg + strFail + strMessage) + "').text()); window.returnValue = false; </script>");
+            }
+        }
+        #endregion
+    }
+}

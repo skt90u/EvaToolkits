@@ -1,0 +1,103 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter name="masterConfig" type="SmasToolkit_v2.MasterPageGeneratorConfig" #>
+<#@ parameter name="detailConfig" type="SmasToolkit_v2.DetailPageGeneratorConfig" #>
+<# 
+    var PageId = masterConfig.PageId;
+    var PageCategory = Utils.GetPageCategory(PageId);
+    var Buttons = masterConfig.Buttons;
+    var QueryConditions = masterConfig.QueryConditions;
+
+    var columns = Utils.GetFields(masterConfig.Sql);
+    var columnsHide = masterConfig.Hidecolumn ?? new string[]{};
+    var columnsVisible = columns.Except(columnsHide);
+    var width = (int)(100 / columnsVisible.Count());
+    
+    var detl = string.IsNullOrEmpty(masterConfig.DetailSql) ? string.Empty : "QueryDetl";
+    var ChkBox = "N";
+    var gridwidth = string.Join(",", columnsVisible.Select(col => string.Format("{0}%", width)));
+    var hidecolumn = string.Join(",", columnsHide);
+    var TextAlign = string.Join(",", columnsVisible.Select(col => "L"));
+#>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="<#= PageId #>.aspx.cs" Inherits="SMAS.MainWebAP.<#= PageCategory #>.<#= PageId #>" %>
+<%@ Register TagPrefix="ddsc" Namespace="DDSC.CustomServerControl" Assembly="DDSC.CustomServerControl" %>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head" runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=9" />
+    <title></title>
+    <link href="../styles/style.css" rel="stylesheet" type="text/css" />
+    <link href="../Styles/jquery-ui.css" rel="stylesheet" />
+    <link href="../Styles/reset.css" rel="stylesheet" type="text/css" />
+    <script src="../Scripts/jquery-1.8.3.js"></script>
+    <script src="../Scripts/FunctionHander.js"></script>
+    <script src="../Scripts/scroll.js"></script>
+    <script src="../Scripts/GridDataBind.js"></script>
+    <script src="../Scripts/BlockUI.js"></script>
+    <script src="../Scripts/jquery-ui.js"></script>
+    <script src="js/<#= PageId #>.js"></script>
+    <style type="text/css">
+        #ProgramPageIndex {width: 28px;}
+    </style>
+</head>
+<body bgcolor="#e7eef4">
+<form id="form1" runat="server">
+<div id="Wrapper">
+<div id="pageTop">
+    <div class="Navgation"><asp:Label ID="User_Info" runat="server" Text=""></asp:Label></div>
+    <div class="TitleName01"><asp:Label ID="lbl<#= PageId #>" runat="server" Text=""></asp:Label>-<#= PageId #></div>
+    <div class="linespace">
+        <div>
+		    <#
+			PushIndent("			");
+			foreach (var button in Buttons)
+			{
+				WriteLine(button.RenderHtml());
+			}
+			ClearIndent();
+		    #>
+        </div>
+        <div class="round">
+            <table border="0" align="center" cellpadding="5" class="table01" style="width: 98%; margin-top: 20px;">
+		        <#
+			    PushIndent("				");
+			    foreach (var queryCondition in QueryConditions)
+			    {
+					WriteLine("<tr>");
+					WriteLine("	<td>");
+					WriteLine("		{0}", queryCondition.RenderLabel());
+					WriteLine("	</td>");
+					WriteLine("	<td>");
+					WriteLine("		{0}", queryCondition.RenderHtml());
+					WriteLine("	</td>");
+					WriteLine("</tr>");
+			    }
+			    ClearIndent();
+		        #>
+            </table>
+        </div>
+        <div class="round">
+            <div style="position: relative; width: 100%; height: 400px;" onclick='GridEventHandler(event,this.id);' class="Program" id="Program"></div>
+            <%--換頁區塊--%>
+        </div>
+		<div class="GridTableFooter" id="ProgramPageControl" detl="<#= detl #>" ChkBox="<#= ChkBox #>" gridwidth="<#= gridwidth #>" hidecolumn="<#= hidecolumn #>" TextAlign="<#= TextAlign #>">
+            <div id="ProgramPageInfo" class="moretxt" style="width: 50%; text-align: left"></div>
+            <div id="Span1" style="width: 100%; text-align: right">
+                <input type="button" id="ProgrambtnFirst" value="第一頁" class="BtnOn" />
+                <input type="button" id="ProgrambtnPrev" value="上一頁" class="BtnOn" />
+                <span id="ProgramPages"></span>
+                <input type="button" id="ProgrambtnNext" value="下一頁" class="BtnOn" />
+                <input type="button" id="ProgrambtnLast" value="最後頁" class="BtnOn" />
+                &#160;<label id="lblGO_TO1">Go to</label>&#160;<input type="text" id="ProgramPageIndex" class="width_4" maxlength="4" value="" />
+                <input type="button" id="ProgrambtnGoto" class="BtnOn" value="GO" class="btn_Go" name="Go" />
+            </div>
+        </div>
+    </div>
+</div> <!-- pageTop -->
+</div> <!-- Wrapper -->
+</form>
+</body>
+</html>

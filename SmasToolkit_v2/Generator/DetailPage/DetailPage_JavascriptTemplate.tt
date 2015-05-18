@@ -1,0 +1,154 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ parameter name="masterConfig" type="SmasToolkit_v2.MasterPageGeneratorConfig" #>
+<#@ parameter name="detailConfig" type="SmasToolkit_v2.DetailPageGeneratorConfig" #>
+<# 
+    var PageId = detailConfig.PageId;
+    var ParentPageId = detailConfig.ParentPageId;
+    var PageCategory = Utils.GetPageCategory(PageId);
+
+    var Buttons = detailConfig.Buttons;
+    var Columns = detailConfig.Columns;
+
+    var MasterSql = masterConfig.Sql;
+    var MasterDetailSql = masterConfig.DetailSql;
+    var MasterSqlLines = Utils.GetFormattedSqlLines(MasterSql);
+    var MasterSqlFields = Utils.GetFields(MasterSql);
+    var MasterDetailSqlLines = Utils.GetFormattedSqlLines(MasterDetailSql);
+    
+    var DetailTableName = detailConfig.TableName;
+
+    var FetchDataSql = Utils.GenerateFetchDataSql(masterConfig, detailConfig);
+    var FetchDataSqlLines = Utils.GetFormattedSqlLines(FetchDataSql);
+#>
+$(document).ready(function () {
+
+    var buttonType = ($("#hidACT_TYPE").val() || '').trim().toUpperCase(); // 上一頁執行的動作(修改UPD, 查詢QRY, 複製COPY, 新增ADD, 刪除DEL)
+    // TODO: 不同模式下的初始化
+
+    // 當 datepicker 是唯讀模式，移除所有附加的事件
+    $('input[typemode=date][readonly=true]').off('blur focus keydown keydown keypress keyup');
+});
+
+function btnDELETE_Click() {
+	return confirm("確定是否刪除此筆資料?");
+}
+
+function btnCLEAR_Click() {
+	clearText($("#form1")[0].elements);
+
+    // 如果使用clearText仍然沒有完全清空資料，請再加入以下要清空的欄位
+	<#
+	PushIndent("	");
+	foreach (var column in Columns)
+	{
+		WriteLine("// {0};", column.JsSetValue(string.Empty));
+	}
+	ClearIndent();
+	#>
+
+	return false; // 避免 postback
+}
+
+function btnSave_Click() {
+
+    // 清空錯誤訊息
+	InitErr();
+
+    var buttonType = ($("#hidACT_TYPE").val() || '').trim().toUpperCase(); // 上一頁執行的動作(修改UPD, 查詢QRY, 複製COPY, 新增ADD, 刪除DEL)
+
+    // 自訂檢驗(必填欄位)
+	<#
+	PushIndent("	");
+	foreach (var column in Columns)
+	{
+        if (column.IsRequired || column.IsPrimaryKey)
+        {
+            WriteLine("ErrCtrl($('#{0}'), '{1}格式錯誤!', validationEngine, 'check{2}');", column.GetInputId(), column.Desc, column.Name);
+        }
+	}
+	ClearIndent();
+	#>
+
+    // 自訂檢驗(非必填欄位，有輸入才檢驗)
+	<#
+	PushIndent("	");
+	foreach (var column in Columns)
+	{
+        if (!column.IsRequired && !column.IsPrimaryKey)
+        {
+            WriteLine("//if ({0} != '')", column.JsGetValue());
+			WriteLine("//	ErrCtrl($('#{0}'), '{1}格式錯誤!', validationEngine, 'check{2}');", column.GetInputId(), column.Desc, column.Name);
+        }
+	}
+	ClearIndent();
+	#>
+
+    // 當主主頁執行的動作為(複製COPY, 新增ADD)，需要檢驗主鍵值是否重複
+	if (buttonType == "ADD" || buttonType == "COPY") {
+		<#
+		PushIndent("		");
+		foreach (var column in Columns)
+		{
+            if (column.IsPrimaryKey)
+            {
+                WriteLine("ErrCtrl($('#{0}'), '{1}已經存在,請確認!', validationEngine, 'DoesDataAlreadyExist'); // 如果{0}不是主鍵值欄位，請移除這一行", column.GetInputId(), column.Desc);
+            }
+		}
+		ClearIndent();
+		#>
+	}
+
+    // 執行預設檢驗項目(AllowEmpty, TypeMode==number, TypeMode==date || TypeMode==dateR, DataFormat)
+	return isValid();
+}
+
+var validationEngine = {
+	// 自訂驗證方法
+	<#
+		PushIndent("	");
+
+		foreach (var column in Columns)
+		{
+			WriteLine("check{0}: function () {{ return true; }},", column.Name);
+		}
+
+		ClearIndent();
+	#>
+	DoesDataAlreadyExist: function () {
+		var result = true;
+
+		// 將所有欄位傳上去
+		var data = { 
+			<#
+			PushIndent("			");
+			foreach (var column in Columns)
+			{
+				WriteLine("p_{0}: {1} || '',", column.Name, column.JsGetValue());
+			}
+			ClearIndent();
+			#>
+		};
+
+		$.ajax({
+			type: "POST",
+			async: false, // 同步呼叫，等待此呼叫結束，才回傳結果
+			url: "<#= ParentPageId #>.aspx/DoesDataAlreadyExist",
+			data: JSON.stringify(data),
+			contentType: "application/json; charset=utf-8",
+			dataType: "json",
+			error: function (jqXHR, textStatus, errorThrown) {
+				alert(jqXHR.responseText);
+                result = true;
+			},
+			success: function (data, textStatus, jqXHR) {
+				result = !(data.d);
+			}
+		});
+
+		return result;
+	}
+};
