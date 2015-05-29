@@ -56,6 +56,11 @@ namespace EvaToolkits
                 SiAuto.Main.LogError(dtname);
         }
 
+        public static void D(string message)
+        {
+            SiAuto.Main.LogMessage(message);
+        }
+
         public static string GetFormattedSql(string sql)
         {
             TGSqlParser sqlparser = new TGSqlParser(TDbVendor.DbVOracle);

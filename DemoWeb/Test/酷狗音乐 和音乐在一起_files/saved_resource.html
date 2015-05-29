@@ -1,0 +1,83 @@
+
+<!-- saved from url=(0025)http://p.kugou.com/?id=19 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<title>kugou</title>
+		<style type="text/css">
+		*{ margin: 0; padding: 0;}
+		html{overflow:hidden;border:0px;}
+		body {margin: 0px;padding:0px;border:0px;overflow:hidden;font:12px Arial, Helvetica, sans-serif;background-color:;}		a{color:#000; text-decoration:none;}
+		a:hover{text-decoration:underline; color:#D60000;}
+		a img{border:0;}
+		img{border:0;}
+		.frame{padding:0; margin:0;overflow:hidden;border:0px;}
+		</style>
+		<script type="text/javascript">
+		function softClick(url,num){
+		 if(num>0){
+				sdnClick(num);
+		 }
+		 try{
+			 var ver = external.SuperCall(301);
+	if (ver > 7033){external.SuperCall(600, 1, url);				 return;
+			 }
+		 }
+		 catch (e) { }
+		 window.open(url);
+		}
+		function softClickByGame(url,num){
+		 if(num>0){
+				sdnClick(num);
+		 }
+		 try{
+			 var ver = external.SuperCall(301);
+			 if (ver>= 7105&&ver<=7206||ver>7295){
+				 external.SuperCall(610, 'adurl:'+url+'|from:11', url);
+				 return;
+			 }
+		 }
+		 catch (e) { }
+		 window.open(url);
+		}
+		function sdnClick(num){
+			(new Image()).src = "http://ads.service.kugou.com/v1/link?id="+num+"&t="+ Math.random();
+		}
+		function sdnClicks(nums){
+			(new Image()).src = "http://ads.service.kugou.com/v1/links?ids="+nums+"&t="+ Math.random();
+		}
+		function FillsdnClick(num){
+			var as = document.getElementsByTagName("a");
+			for(var i = 0; i<as.length;i++){
+				 as[i].onclick = function(){
+					sdnClick(num);
+				 }
+			}
+		}
+		function HidContextMenuc(){
+			document.oncontextmenu = function(oEvent){
+			   try{
+				   if (document.all){
+						oEvent = window.event;
+						oEvent.returnValue = false;
+					}
+					else{
+						oEvent.preventDefault();
+					}
+			   }
+			  catch(e){}
+			 };
+		}
+		</script>
+		</head>
+		<body>
+	<div class="frame"><a href="http://adclk.thinkmedia.cn/clk/pid=1864/media=KUGOU.CN/place=55Kgsydl/size=80x160" target="_blank"><img src="dl-sx1209.jpg"></a></div><script type="text/javascript">
+setTimeout(function(){
+sdnClicks(24227);
+ },1000);			window.onload = function(){
+				HidContextMenuc();
+			}
+			</script>
+			
+			
+		
+<div class="vimiumReset vimiumHUD" style="right: 150px; display: none;"></div></body></html>

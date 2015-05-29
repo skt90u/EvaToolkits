@@ -35,6 +35,9 @@
     <Reference Include="gudusoft.gsqlparser">
       <HintPath>..\..\..\..\Users\Z151\Downloads\gsqlparser_dotnet_trial_2_4_9 (1)\gudusoft.gsqlparser.dll</HintPath>
     </Reference>
+    <Reference Include="Sasa">
+      <HintPath>..\packages\Sasa.0.16.0\lib\net40\Sasa.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -51,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EvaToolkits\EvaToolkits.csproj">

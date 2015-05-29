@@ -7,12 +7,26 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace SmasToolkit_v2
 {
     public static class Utils
     {
+        public static void FormatSqlFile(string inFile, string outFile, string prefix = "", string postfix = "")
+        {
+            string sql = File.ReadAllText(inFile);
+
+            List<string> sqlParts = GetFormattedSqlLines(sql);
+
+            if(File.Exists(outFile))
+                File.Delete(outFile);
+
+            foreach (string sqlPart in sqlParts)
+            {
+                File.AppendAllText(outFile, string.Format("{0}{1}{2}\r\n", prefix, sqlPart.ToUpper(), postfix));
+            }
+        }
+
         public static void MakeSureDirExists(string dirPath)
         {
             if (!Directory.Exists(dirPath))

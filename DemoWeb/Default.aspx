@@ -36,4 +36,27 @@
             <a href="http://go.microsoft.com/fwlink/?LinkId=245143">Learn more…</a>
         </li>
     </ol>
+    <script src="Scripts/jquery-1.8.2.js"></script>
+    <script src="Scripts/raygun.js"></script>
+    <script>
+        $(function () {
+            Raygun.init('Y0eMpWFju88conLhINIQxQ==');
+
+            throw new Error('sss');
+
+            /*
+            try {
+                // your code
+                Raygun.send(new Error('ggg'));
+
+                //throw new Error('oops');
+
+
+            }
+            catch (e) {
+                Raygun.send(e);
+            }
+            */
+        });
+    </script>
 </asp:Content>

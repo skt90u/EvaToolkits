@@ -1,0 +1,184 @@
+
+<!-- saved from url=(0025)http://p.kugou.com/?id=21 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<title>kugou</title>
+	<style type="text/css">
+	*{padding:0; margin:0}
+	html{overflow:hidden;border:0px;}
+	body {margin: 0px;padding:0px;border:0px;overflow:hidden;font:12px Arial, Helvetica, sans-serif;background-color:;}	a{color:#D60000; text-decoration:none;}
+	a:hover{text-decoration:underline; color:#D60000;}
+	a img{border:0;}
+	img{border:0; cursor:pointer;}
+	.adv{ width:696px; height:100px; overflow:hidden; text-align:center; line-height:260px;position:absolute;left:-9999px;top:0}iframe{ border:0px; overflow:hidden; width:696px; height:100px;}	</style>
+	</head>
+	<body>
+	<div id="main"><div class="adv" id="adv0" style="left: -9999px;"><img onclick="softClick(&#39;http://sdn.kugou.com/link.aspx?id=19227&amp;dl=1&#39;,0)" src="20150505111226430.jpg" width="696" height="100"></div><div class="adv" id="adv1" style="left: 0px;"><object id="flash1" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10.0.32" width="696" height="100"><param name="movie" value="http://gg.kugou.com/mini/images/20150520161821893.swf"><param name="bgColor" value="#f5f5f5"><param name="flashvars" value=""><param name="quality" value="high"><param name="allowScriptAccess" value="always"><param name="align" value="middle"><embed src="http://gg.kugou.com/mini/images/20150520161821893.swf" allowscriptaccess="always" flashvars="" quality="high" width="696" height="100" align="middle" type="application/x-shockwave-flash"></object></div>	</div>
+	
+	
+	<script type="text/javascript">
+		function softClick(url,num){
+	 if(num>0){
+			sdnClick(num);
+	 }
+	 try{
+		 var ver = external.SuperCall(301);
+	if (ver > 7033){external.SuperCall(600, 1, url);					return;
+					}
+		}
+	 catch (e) { }
+	 window.open(url);
+	}
+	function softClickByGame(url,num){
+	 if(num>0){
+			sdnClick(num);
+	 }
+	 try{
+		 var ver = external.SuperCall(301);
+		 if (ver>= 7105&&ver<=7206||ver>7295){
+			 external.SuperCall(610, 'adurl:'+url+'|from:11', url);
+			 return;
+		 }
+	 }
+	 catch (e) { }
+	 window.open(url);
+	}
+	function sdnClick(num){
+		(new Image()).src = "http://ads.service.kugou.com/v1/link?id="+num+"&t="+ Math.random();
+	}
+	function sdnClicks(nums){
+		(new Image()).src = "http://ads.service.kugou.com/v1/links?ids="+nums+"&t="+ Math.random();
+	}
+	function HidContextMenuc(){
+		document.oncontextmenu = function(oEvent){
+		   try{
+			   if (document.all){
+					oEvent = window.event;
+					oEvent.returnValue = false;
+				}
+				else{
+					oEvent.preventDefault();
+				}
+		   }
+		  catch(e){}
+		 };
+	}
+	function FillsdnClick(num){
+		var as = document.getElementsByTagName('a');
+		for(var i = 0; i<as.length;i++){
+			 as[i].onclick = function(){
+				sdnClick(num);
+			 }
+		}
+	}
+	</script>
+	<script type="text/javascript">
+	var json=[{"type":1,"url":"http:\/\/sdn.kugou.com\/link.aspx?id=19227&dl=1","code":"http:\/\/gg.kugou.com\/mini\/images\/20150505111226430.jpg","tongji":0},{"type":2,"url":"","code":"http:\/\/gg.kugou.com\/mini\/images\/20150520161821893.swf","tongji":0}];	var idx = parseInt(Math.random() * json.length);
+	var change_time = 100000;	var canUseFlash = true;
+	function writeAdv(num){
+		var html = '';
+		var el = document.getElementById('adv' + num);
+		switch(json[num]['type']){
+			case 1:
+	html = '<img onclick="softClick(\'' + json[num]['url'] + '\','+json[num]['tongji']+')" src="' + json[num]['code'] + '" width="696" height="100"/>';				el.innerHTML = html;
+				break;
+			case 2:
+				if(canUseFlash){
+    html += '<object id="flash' + num + '" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=10.0.32" width="696" height="100">';					html += '<param name="movie" value="' + json[num]['code'] + '" />';
+					html += '<param name="bgColor" value="#f5f5f5" />';
+					html += '<param name="flashvars" value="" />';
+					html += '<param name="quality" value="high" />';
+					html += '<param name="allowScriptAccess" value="always" />';
+					html += '<param name="align" value="middle" />';
+					html += '<embed src="' + json[num]['code'] + '" AllowScriptAccess="always" FlashVars="" quality="high" width="696" height="100" align="middle" type="application/x-shockwave-flash"></embed>';					html += '</object>';
+				}else{
+					html = '\u60a8\u6ca1\u6709\u5b89\u88c5flash\u6216\u8005\u60a8\u7684flash\u7248\u672c\u8fc7\u4f4e\uff0c\u8bf7\u5148<a href="http://get.adobe.com/cn/flashplayer/?promoid=JZEFT" target="_blank">\u5b89\u88c5</a>';
+				}
+				el.innerHTML = html;
+				break;
+			case 3:
+				html = '<iframe frameborder="0" src="' + json[num]['url'] + '" scrolling="no" width="696" height="100"></iframe>';				el.innerHTML = html;
+				break;
+			case 4:
+				if(el.getElementsByTagName("textarea").length > 0){
+					var val = el.getElementsByTagName("textarea")[0].value;
+					var write = document.write;
+					document.write = function(val){
+						el.innerHTML = val;
+					}
+					eval(val);
+					document.write = write;
+				}
+				break;
+		}
+	}
+	function autoChange(){
+		autoChange.timer = setInterval(function(){
+			if(!autoChange.reload){
+				loadNext();
+				for(var i = 0; i < json.length; i++){
+					document.getElementById('adv' + i).style.left = '-9999px';
+				}
+				document.getElementById('adv' + idx).style.left = '0';
+				var flash = document.getElementById('flash' + idx);
+				if(flash){
+					try{
+						flash.replay();
+					}catch(e){}
+				}
+			}
+		},change_time)
+	}
+	function bindEvent(){
+	 var els = document.getElementById('main').getElementsByTagName('div');
+	 for(var i = 0; i < els.length; i++){
+		 if(/adv/g.test(els[i].className)){
+			 els[i].onmouseover = function(){
+				autoChange.timer && clearInterval(autoChange.timer);
+			 };
+			 els[i].onmouseout = function(){
+				 autoChange.reload = true;
+				 autoChange()
+				 autoChange.reload = false;
+			 };
+		 }
+	 }
+	}
+	function loadNext(){
+	 idx++;
+	 idx = (idx > (json.length - 1))?0:idx;
+	 if(document.getElementById('adv' + idx).innerHTML.length <= 0|| document.getElementById('adv' + idx).getElementsByTagName("textarea").length > 0){
+			writeAdv(idx)
+	 }
+	}
+	setTimeout(function(){
+	sdnClicks("24229");	
+	},1000);
+	window.onload = function(){
+		try{
+		 if(window.ActiveXObject){
+			 var swf = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+			 swf && (canUseFlash = true);
+		  }else if(navigator.plugins && navigator.plugins.length > 0){
+			 var swf = navigator.plugins['Shockwave Flash'];
+			 swf && (canUseFlash = true);
+		  }
+	 }catch(e){
+		 canUseFlash = false;
+	 }
+	init();
+	}
+	function init(){
+		var preView = document.getElementById("pre_view");
+	 setTimeout(function(){
+		 writeAdv(idx);
+		 document.getElementById('adv'+idx).style.left = '0';
+		 autoChange();
+		 bindEvent();
+		 HidContextMenuc();
+		 preView && (document.getElementById("pre_view").style.display = "none");
+	 },preView?2000:0);
+	}
+	</script>
+	
+<div class="vimiumReset vimiumHUD" style="right: 150px; display: none;"></div></body></html>

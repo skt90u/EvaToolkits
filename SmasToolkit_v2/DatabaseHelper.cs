@@ -21,6 +21,18 @@ namespace SmasToolkit_v2
 
         public DatabaseHelper() : this(DefaultConnectionString){}
 
+        public List<string> GetPrimaryKeys(string tableName)
+        {
+            List<string> result = new List<string>();
+            
+            DataTable dt = Query(string.Format("SELECT COLUMN_NAME FROM user_cons_columns WHERE TABLE_NAME = '{0}'", tableName));
+
+            foreach (DataRow row in dt.Rows)
+                result.Add(GetFieldStr(row, "COLUMN_NAME"));
+
+            return result;
+        }
+
         public DataTable Query(string sql)
         {
             if (string.IsNullOrEmpty(sql))
@@ -46,14 +58,36 @@ namespace SmasToolkit_v2
         /// 如果為NULL，回傳空字串
         /// 如果不為NULL，轉換成字串，並TRIM掉左右兩邊多餘空格
         /// </summary>
-        public string GetFieldStr(DataTable dataTable, int index, string columnName)
+        public static string GetFieldStr(DataTable dataTable, int index, string columnName)
         {
-            object obj = GetField(dataTable, index, columnName);
+            return GetFieldStr(dataTable.Rows[index], columnName);
+        }
+
+        public static string GetFieldStr(DataRow row, string columnName)
+        {
+            object obj = GetField(row, columnName);
 
             return obj == null ? string.Empty : obj.ToString().Trim();
         }
 
-        public object GetField(DataTable dataTable, int index, string columnName)
+
+        public static object GetField(DataRow row, string columnName)
+        {
+            if (row == null)
+                throw new ArgumentNullException("row");
+
+            if (string.IsNullOrEmpty(columnName))
+                throw new ArgumentNullException("columnName");
+
+            DataTable dataTable = row.Table;
+
+            if (!dataTable.Columns.Contains(columnName))
+                throw new Exception(string.Format("ColumnNotFound({0})", columnName));
+
+            return row[columnName];
+        }
+
+        public static object GetField(DataTable dataTable, int index, string columnName)
         {
             if (dataTable == null)
                 throw new ArgumentNullException("dataTable");
@@ -61,13 +95,23 @@ namespace SmasToolkit_v2
             if ((index < 0) || (index >= dataTable.Rows.Count))
                 throw new ArgumentOutOfRangeException(string.Format("index, (index: {0}, Count: {1})", index, dataTable.Rows.Count));
 
-            if (string.IsNullOrEmpty(columnName))
-                throw new ArgumentNullException("columnName");
+            return GetField(dataTable.Rows[index], columnName);
+        }
 
-            if (!dataTable.Columns.Contains(columnName))
-                throw new Exception(string.Format("ColumnNotFound({0})", columnName));
+        public List<string> GetColumnNames(string tableName)
+        {
+            DataTable dt = Query(string.Format("SELECT * FROM {0} WHERE 1 = 0", tableName));
 
-            return dataTable.Rows[index][columnName];
+            List<string> result = new List<string>();
+
+            foreach (DataColumn column in dt.Columns)
+            {
+                EvaToolkits.Logger.D(column.ColumnName);
+                EvaToolkits.Logger.D(column.DataType.ToString());
+                result.Add(column.ColumnName);
+            }
+
+            return result;
         }
     }
 }
