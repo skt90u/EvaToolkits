@@ -1,111 +1,25 @@
 ﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title></title>
+    <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    
+    <script src="http://code.jquery.com/jquery-2.1.4.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <script src="Scripts/html4-defs.js"></script>
+    <script src="Scripts/html-sanitizer.js"></script>
+    <script>
+        function urlX(url) { if (/^https?:\/\//.test(url)) { return url } }
+        function idX(id) { return id }
+        alert(html_sanitize('<b>hello</b><img src="http://asdf"><a href="javascript:alert(0)"><script src="http://dfd"><\/script>', urlX, idX))
+    </script>
 </head>
 <body>
-
-<style>
-    span.success {
-        color: #3c763d;
-        font-weight:bold;
-    }
-    span.error {
-        color: #c12e2a;
-        font-weight:bold;
-    }
-
-    span.debug {
-        color: #8FBC8F;
-        font-weight:bold;
-    }
-
-    span.info {
-        color: #2aabd2;
-        font-weight:bold;
-    }
-
-    span.warn {
-        color: #eb9316;
-        font-weight:bold;
-    }
-
-    span.error {
-        color: #c12e2a;
-        font-weight:bold;
-    }
-</style>
-
-<div class="container">
-<div class="panel panel-primary">
-<div class="panel-heading">執行結果</div>
-    <table class="table table-striped table-bordered table-hover">
-        <tbody>
-            <tr>
-                <td>開始時間</td>
-                <td>2015/05/28 12:05:03</td>
-            </tr>
-            <tr>
-                <td>花費時間</td>
-                <td>00:12:03</td>
-            </tr>
-            <tr>
-                <td>執行結果</td>
-                <td>
-                    <span class="success">成功</span>
-                    <span class="error">失敗</span>
-                </td>
-            </tr>
-            <tr>
-                <td>備註說明</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td valign="top" >執行歷程</td>
-                <td>
-
-<table class="table table-striped table-bordered table-hover">
-    <thead>
-        <tr>
-            <td class="col-md-1">類型</td>
-            <td class="col-md-1">時間</td>
-            <td>訊息</td>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><span class="debug">DEBUG</span></td>
-            <td>12:05:03</td>
-            <td>...</td>
-        </tr>
-        <tr>
-            <td><span class="info">INFO</span></td>
-            <td>12:05:03</td>
-            <td>...</td>
-        </tr>
-        <tr>
-            <td><span class="warn">WARN</span></td>
-            <td>12:05:03</td>
-            <td>...</td>
-        </tr>
-        <tr>
-            <td><span class="error">ERROR</span></td>
-            <td>12:05:03</td>
-            <td>...</td>
-        </tr>
-    </tbody>
-</table>
-                    
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-</div>
-
-
 </body>
 </html>

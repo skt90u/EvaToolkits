@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.IO;
 using SmasToolkit_v2;
+using SMAS.Cryptography;
 
 namespace EvaToolkits_cli
 {
@@ -81,10 +82,34 @@ namespace EvaToolkits_cli
         
     }
 
+    public class Item
+    {
+        public string a { get; set; }
+        public string b { get; set; }
+    }
+
     class Program
     {
+        
+
         static void Main(string[] args)
         {
+            //        this._id = Crypto.CryptoInstance.DecryptString(Node.SelectSingleNode("userID").InnerText);　　　　　　　　　		//使用者編號
+            //                this._password = Crypto.CryptoInstance.DecryptString(Node.SelectSingleNode("userPW").InnerText);　　　　　		//使用者密碼
+            //            <ID>AAFS_SMAS</ID>
+            //<Password>SMAS_FIS0301</Password>
+
+            var aaaa = Crypto.CryptoInstance.EncryptString("AAF0_SMAS");
+            var aaaab = Crypto.CryptoInstance.EncryptString("SMAS_UNIFIS0301");
+
+            Utils.FormatSqlFile(@"C:\1.SQL", @"C:\2.SQL");
+            return;
+            string str = "[{a:3, b:4}]";
+
+            str = Microsoft.Security.Application.Encoder.HtmlEncode(str);
+            
+            Item[] Items = Newtonsoft.Json.JsonConvert.DeserializeObject<Item[]>(str);
+
             var cfg = new DalGeneratorConfig("Provider=OraOLEDB.Oracle; Data Source=SMAST; User Id=scs; Password=p35scs2015;Pooling = false;", "PSN_OPEN_DATA_ORG");
 
             DalGenerator g = new DalGenerator(cfg);

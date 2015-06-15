@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dbSetting>
+  <dataBase id="SQL SERVER">
+    <DBType>SQL SERVER</DBType>
+    <DBServer>STEVENC-VM\sqlexpress</DBServer>
+    <DBName>Demo</DBName>
+    <ID>sa</ID>
+    <Password>corecore</Password>
+    <ConnectionTimeOut>1</ConnectionTimeOut>
+  </dataBase>
+  <dataBase id="TCMS">
+    <DBType>Oracle</DBType>
+    <DBServer>TCMSTEST.evaair.com</DBServer>
+    <DBName>TCMS</DBName>
+    <ID>TCMSTEST</ID>
+    <Password>p35TCMST082</Password>
+    <ConnectionTimeOut>1</ConnectionTimeOut>
+  </dataBase>
+  <!--<dataBase id="TCMS">
+    <DBType>Oracle</DBType>
+    <DBServer>TCMS.evaair.com</DBServer>
+    <DBName>TCMS</DBName>
+    <ID>TCMS</ID>
+    <Password>p35TCMS03</Password>
+    <ConnectionTimeOut>1</ConnectionTimeOut>
+  </dataBase>-->
+    
+  <dataBase id="CAFS">
+    <DBType>Oracle</DBType>
+    <DBServer>CAFS.evaair.com</DBServer>
+    <DBName>CAFS</DBName>
+    <ID>CAFS</ID>
+    <Password>p35CAFS01</Password>
+    <ConnectionTimeOut>1</ConnectionTimeOut>
+  </dataBase>
+
+  <dataBase id="FIS">
+    <DBType>Oracle</DBType>
+    <DBServer>FIS.evaair.com</DBServer>
+    <DBName>FIS</DBName>
+    <ID>AAFS_SMAS</ID>
+    <Password>SMAS_FIS0301</Password>
+    <ConnectionTimeOut>1</ConnectionTimeOut>
+  </dataBase>
+
+  <dataBase id="UNIFIS">
+    <DBType>ORACLE</DBType>
+    <DBServer>UNIFIS.uniair.com</DBServer>
+    <DBName>UNIFIS</DBName>
+    <ID>AAF0_SMAS</ID>
+    <Password>SMAS_UNIFIS0301</Password>
+    <ConnectionTimeOut>1</ConnectionTimeOut>
+  </dataBase>
+</dbSetting>

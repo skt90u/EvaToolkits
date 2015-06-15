@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <script src="http://code.jquery.com/jquery-2.1.4.js"></script>
+</head>
+<body>
+    <button>aaa</button>
+    <script>
+        $(function () {
+            $('button').click(function () {
+                var win = window.open("HtmlPage4.html");
+                
+                win.onload = function () {
+                    alert('1');
+                    win.onbeforeunload = function () {
+                        alert('2');
+                    }
+                }
+
+                $(win).unload(function () {
+                    alert('3');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
