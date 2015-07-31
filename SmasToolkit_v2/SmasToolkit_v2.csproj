@@ -70,6 +70,28 @@
     <Compile Include="Generator\DetailPage\DetailPageGenerator.cs" />
     <Compile Include="Generator\MasterPage\MasterPageGenerator.cs" />
     <Compile Include="Generator\PageGenerator.cs" />
+    <Compile Include="Generator\Report\ReportGenerator.cs" />
+    <Compile Include="Generator\Report\ReportConfig.cs" />
+    <Compile Include="Generator\Report\Report_AspxCsTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Report_AspxCsTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Generator\Report\Report_AspxTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Report_AspxTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Generator\Report\Report_BLLTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Report_BLLTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Generator\Report\Report_JavascriptTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Report_JavascriptTemplate.tt</DependentUpon>
+    </Compile>
     <Compile Include="HtmlTag\HtmlTag_Button.cs" />
     <Compile Include="HtmlTag\HtmlTag_TextBox.cs" />
     <Compile Include="Generator\MasterPage\MasterPage_AspxCsTemplate.cs">
@@ -137,6 +159,22 @@
     <None Include="Generator\MasterPage\MasterPage_JavascriptTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>MasterPage_JavascriptTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="Generator\Report\Report_AspxCsTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Report_AspxCsTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="Generator\Report\Report_AspxTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Report_AspxTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="Generator\Report\Report_BLLTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Report_BLLTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="Generator\Report\Report_JavascriptTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>Report_JavascriptTemplate.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

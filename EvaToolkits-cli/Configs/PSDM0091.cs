@@ -16,7 +16,7 @@ namespace EvaToolkits_cli
             this.Title = "TODO";
             this.TableName = "PSD_LED_PPT_ITEM";
 
-            this.Buttons = Button.GetDefaultDetailageButtons(this.ParentPageId);
+            this.Buttons = Button.GetDefaultDetailButtons(this.ParentPageId);
 
             this.Columns.Add(new TextBox { Name = "SEQ", Desc = "序號", IsPrimaryKey = true });
             this.Columns.Add(new Date { Name = "EFF_DATE", Desc = "日期區間", IsRequired = true });

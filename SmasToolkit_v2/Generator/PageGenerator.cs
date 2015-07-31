@@ -51,7 +51,7 @@ namespace SmasToolkit_v2
             detailConfig.Title = "TODO";
             detailConfig.TableName = "PSD_LEADTIME_ITEM";
 
-            detailConfig.Buttons = Button.GetDefaultDetailageButtons(detailConfig.ParentPageId);
+            detailConfig.Buttons = Button.GetDefaultDetailButtons(detailConfig.ParentPageId);
 
             detailConfig.Columns.Add(new TextBox { Name = "SEQ", Desc = "序號", IsPrimaryKey = true });
             detailConfig.Columns.Add(new RadioButtonList { Name = "STATUS", Desc = "狀態", IsRequired = true });

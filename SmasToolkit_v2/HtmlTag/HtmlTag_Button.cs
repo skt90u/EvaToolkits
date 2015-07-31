@@ -64,7 +64,7 @@ namespace SmasToolkit_v2
             return Buttons;
         }
 
-        public static List<Button> GetDefaultDetailageButtons(string parentPageId)
+        public static List<Button> GetDefaultDetailButtons(string parentPageId)
         {
             //<asp:Button ID="btnSave" class="BtnOn" runat="server" Text="存檔x" OnClientClick="return btnSave_Click()" OnClick="btnSave_Click" />
             //<asp:Button ID="btnDELETE" class="BtnOn" runat="server" Text="刪除x" OnClientClick="return btnDELETE_Click()" OnClick="btnDELETE_Click" />
@@ -269,6 +269,11 @@ namespace SmasToolkit_v2
             throw new NotImplementedException();
         }
 
-        
+
+
+        public static List<Button> GetDefaultReportButtons()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

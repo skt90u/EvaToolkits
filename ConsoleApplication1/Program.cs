@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
 using System.Data.OracleClient;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -164,11 +165,60 @@ namespace ConsoleApplication1
         static void Main(string[] args)
         {
             {
+                DateTime dateValue;
+                if (DateTime.TryParseExact(
+                        "20150722",
+                        "yyyyMMdd",
+                        new CultureInfo("en-US"),
+                        DateTimeStyles.None,
+                        out dateValue))
+                    Console.WriteLine("Converted '{0}' to {1}.", "", dateValue);
+                else
+                    Console.WriteLine("Unable to convert '{0}' to a date.", "");
+            }
+            //DateTime.TryParseExact("", 
+            {
+                string[] lines = System.IO.File.ReadAllLines(@"C:\1.SQL");
+                string[] lines3 = System.IO.File.ReadAllLines(@"C:\3.SQL");
+
+                // sb.Append("INSERT INTO REPORTLOG VALUES( ");
+                //System.IO.File.AppendAllText(@"C:\2.sql", output2 + "\r\n");
+
+                System.IO.File.AppendAllText(@"C:\4.sql", System.IO.File.ReadAllText(@"C:\5.sql") + "\r\n");
+
+                for (int i = 0; i < lines.Length; i++)
+                //foreach (string line in lines)
+                {
+                    string line = lines[i];
+                    var tokens = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    string output2 = string.Format("                                                parameters.Add(\":{0}\", {1});", tokens[0], lines3[i]);
+                    //string output4 = string.Format("                                                sb.Append(\" :{0} ,\");", tokens[0]);
+                    //System.IO.File.AppendAllText(@"C:\2.sql", output2 + "\r\n");
+                    //System.IO.File.AppendAllText(@"C:\4.sql", output4 + "\r\n");
+                    System.IO.File.AppendAllText(@"C:\4.sql", output2 + "\r\n");
+                }
+
+                System.IO.File.AppendAllText(@"C:\4.sql", "                                                ExecuteNonQuery(conn, sqlstr, parameters);\r\n");
+            }
+
+            return;
+
+            string _sql = " SELECT * FROM PRE_PREORDER_MATERIAL WHERE CODE IN  (  SELECT  DISTINCT CODE  FROM  BAS_MATERIAL  WHERE  REQUEST_DATE BETWEEN '20150601' AND '20150631'  AND CLASS = :CLASS  ) ";
+
+            List<string> sqlParams = _sql.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Where(t => t.Trim().StartsWith(":"))
+                                        .Select(t => t.Trim().Substring(1).ToUpper())
+                                        .ToList();
+
+            var aaa = 0;
+
+            {
                 string sql = System.IO.File.ReadAllText(@"C:\1.SQL");
                 dbAccessLite a = new dbAccessLite("FIS");
                 var b = a.runExecuteQuery("aa", sql);
 
-                
+
                 var c = 0;
             }
 
@@ -185,12 +235,12 @@ namespace ConsoleApplication1
                 var b = a.getConnectionString();
                 Console.WriteLine(b);
 
-//                System.Data.OracleClient.OracleConnectionStringBuilder builder =
-//   new System.Data.OracleClient.OracleConnectionStringBuilder();
-//builder["Data Source"] = "OracleDemo";
-//builder["integrated Security"] = true;
-//builder["User ID"] = "Mary;NewValue=Bad";
-//System.Diagnostics.Debug.WriteLine(builder.ConnectionString);
+                //                System.Data.OracleClient.OracleConnectionStringBuilder builder =
+                //   new System.Data.OracleClient.OracleConnectionStringBuilder();
+                //builder["Data Source"] = "OracleDemo";
+                //builder["integrated Security"] = true;
+                //builder["User ID"] = "Mary;NewValue=Bad";
+                //System.Diagnostics.Debug.WriteLine(builder.ConnectionString);
 
                 //OracleConnectionStringBuilder
             }
