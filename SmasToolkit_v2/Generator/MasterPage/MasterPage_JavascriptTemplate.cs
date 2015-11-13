@@ -18,7 +18,7 @@ namespace SmasToolkit_v2.Generator.MasterPage
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Backup\Markdown\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
+    #line 1 "C:\Project\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "11.0.0.0")]
     public partial class MasterPage_JavascriptTemplate : MasterPage_JavascriptTemplateBase
     {
@@ -29,7 +29,7 @@ namespace SmasToolkit_v2.Generator.MasterPage
         public virtual string TransformText()
         {
             
-            #line 8 "C:\Backup\Markdown\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
+            #line 8 "C:\Project\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
  
     var PageId = masterConfig.PageId;
     var Buttons = masterConfig.Buttons;
@@ -41,7 +41,7 @@ namespace SmasToolkit_v2.Generator.MasterPage
             #line hidden
             this.Write("$(document).ready(function () {\r\n\t");
             
-            #line 15 "C:\Backup\Markdown\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
+            #line 15 "C:\Project\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
 
 	PushIndent("    ");
 	foreach (var button in Buttons)
@@ -74,7 +74,7 @@ function btnSEARCH_Click(p_PageIndex) {
 	var StrWhere = {
 	    ");
             
-            #line 42 "C:\Backup\Markdown\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
+            #line 42 "C:\Project\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
 
 	    PushIndent("		");
 	    foreach (var queryCondition in QueryConditions)
@@ -88,23 +88,54 @@ function btnSEARCH_Click(p_PageIndex) {
             #line hidden
             this.Write("\t};\r\n    gdb_DataBind(\"");
             
-            #line 51 "C:\Backup\Markdown\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
+            #line 51 "C:\Project\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(PageId));
             
             #line default
             #line hidden
             this.Write("\", \"GetProgramADO\", m_PageIndex, \"20\", \"");
             
-            #line 51 "C:\Backup\Markdown\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
+            #line 51 "C:\Project\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(OrderBy));
             
             #line default
             #line hidden
-            this.Write("\", StrWhere, \"Program\");\r\n}");
+            this.Write("\", StrWhere, \"Program\");\r\n}\r\n\r\nfunction HandleOpenQueryCtrl(node)\r\n{\r\n\tvar id = $" +
+                    "(node)[0].id;\r\n\twindow.lastOpenQueryCtrl = id;\r\n\tswitch(id)\r\n\t{\r\n\t    ");
+            
+            #line 60 "C:\Project\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
+
+	    PushIndent("		");
+	    foreach (var queryCondition in QueryConditions.Where(p => p.GetType() == typeof(QueryCtrl)))
+	    {
+        WriteLine("		case '{0}': ", queryCondition.Name);
+            WriteLine("		{{");
+            WriteLine("			OpenQueryCtrl(id, 'WNDQ001' /* queryId, reference: MyResource.zh-TW.resx */, 600 /* width */, 700 /* height */, {} /* queryParams */, true /* isQuery */);");
+            WriteLine("		}}break;");
+	    }
+	    ClearIndent();
+	    
+            
+            #line default
+            #line hidden
+            this.Write(@"	}
+}
+
+function SetQueryToCtrl(result) 
+{
+    var value = result.CODE ||
+                result.EMPLOYEE_NO ||
+                result.DEPARTMENT_NO ||
+                void 0;
+
+    if (window.lastOpenQueryCtrl && value) {
+        $(""#"" + window.lastOpenQueryCtrl).val(value);
+    }
+}");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 1 "C:\Backup\Markdown\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
+        #line 1 "C:\Project\EvaToolkits\SmasToolkit_v2\Generator\MasterPage\MasterPage_JavascriptTemplate.tt"
 
 private global::SmasToolkit_v2.MasterPageGeneratorConfig _masterConfigField;
 

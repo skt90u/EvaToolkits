@@ -13,24 +13,19 @@ namespace SmasToolkit_v2
             #region MasterPageGeneratorConfig
             MasterPageGeneratorConfig masterConfig = new MasterPageGeneratorConfig();
 
-            masterConfig.Title = "航行管制部作業手冊";
-            masterConfig.PageId = "PSDM0070";
-            masterConfig.DetailPageId = "PSDM0071";
-
+            masterConfig.Title = "貴賓室現場流通量設定";
+            masterConfig.PageId = "OUTM0150";
+            masterConfig.DetailPageId = "OUTM0151";
+            
             masterConfig.Buttons = Button.GetDefaultMasterPageButtons(masterConfig.DetailPageId);
 
-            masterConfig.QueryConditions.Add(new DropDownList { Name = "ITEM", Desc = "作業項目" });
-            masterConfig.QueryConditions.Add(new Date { Name = "DATE1", Desc = "日期" });
-            masterConfig.QueryConditions.Add(new Date { Name = "DATE2", Desc = "日期" });
-            masterConfig.QueryConditions.Add(new RadioButtonList { Name = "STATUS", Desc = "狀態" });
-            masterConfig.QueryConditions.Add(new CheckBoxList { Name = "AC_TYPE", Desc = "機型" });
+            masterConfig.QueryConditions.Add(new TextBox { Name = "CODE1", Desc = "料號一" });
+            masterConfig.QueryConditions.Add(new TextBox { Name = "CODE2", Desc = "料號二" });
 
-            masterConfig.Sql = "SELECT SEQ,STATUS,EFF_DATE,EXP_DATE,AC_TYPE,ITEM,LEADTIME,CRT_ID,CRT_DATE,CRT_TIME,UPD_ID,UPD_DATE,UPD_TIME   FROM PSD_LEADTIME_ITEM WHERE 1=1 AND ITEM = :ITEM AND EFF_DATE >= :DATE1 AND EXP_DATE <= :DATE2 AND STATUS = :STATUS AND AC_TYPE = :AC_TYPE";
-            masterConfig.OrderBy = "SEQ";
-
+            masterConfig.Sql = "SELECT 	CODE, 	DESCRIPTION, 	QTY, 	CRT_ID, 	CRT_DATE, 	CRT_TIME, 	UPD_ID, 	UPD_DATE, 	UPD_TIME FROM 	OUT_VIP_FLOATING_SETTING WHERE 1=1 AND CODE >= :CODE1 AND CODE <= :CODE2";
+            masterConfig.OrderBy = "CODE";
+            
             masterConfig.Hidecolumn = new string[] { 
-                "SEQ", 
-                "STATUS", 
                 "CRT_ID", 
                 "CRT_DATE", 
                 "CRT_TIME", 

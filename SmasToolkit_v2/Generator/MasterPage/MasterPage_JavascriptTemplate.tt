@@ -50,3 +50,35 @@ function btnSEARCH_Click(p_PageIndex) {
 	};
     gdb_DataBind("<#= PageId #>", "GetProgramADO", m_PageIndex, "20", "<#= OrderBy #>", StrWhere, "Program");
 }
+
+function HandleOpenQueryCtrl(node)
+{
+	var id = $(node)[0].id;
+	window.lastOpenQueryCtrl = id;
+	switch(id)
+	{
+	    <#
+	    PushIndent("		");
+	    foreach (var queryCondition in QueryConditions.Where(p => p.GetType() == typeof(QueryCtrl)))
+	    {
+        WriteLine("		case '{0}': ", queryCondition.Name);
+            WriteLine("		{{");
+            WriteLine("			OpenQueryCtrl(id, 'WNDQ001' /* queryId, reference: MyResource.zh-TW.resx */, 600 /* width */, 700 /* height */, {} /* queryParams */, true /* isQuery */);");
+            WriteLine("		}}break;");
+	    }
+	    ClearIndent();
+	    #>
+	}
+}
+
+function SetQueryToCtrl(result) 
+{
+    var value = result.CODE ||
+                result.EMPLOYEE_NO ||
+                result.DEPARTMENT_NO ||
+                void 0;
+
+    if (window.lastOpenQueryCtrl && value) {
+        $("#" + window.lastOpenQueryCtrl).val(value);
+    }
+}

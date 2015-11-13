@@ -43,6 +43,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DatabaseHelper.cs" />
+    <Compile Include="Generator\20151103.PageGenerator.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Generator\Dal\ColumnSchema.cs" />
     <Compile Include="Generator\Dal\DalGenerator.cs" />
     <Compile Include="Generator\Dal\DalGeneratorConfig.cs" />
@@ -69,7 +72,6 @@
     <Compile Include="Generator\DetailPage\DetailPageGeneratorConfig.cs" />
     <Compile Include="Generator\DetailPage\DetailPageGenerator.cs" />
     <Compile Include="Generator\MasterPage\MasterPageGenerator.cs" />
-    <Compile Include="Generator\PageGenerator.cs" />
     <Compile Include="Generator\Report\ReportGenerator.cs" />
     <Compile Include="Generator\Report\ReportConfig.cs" />
     <Compile Include="Generator\Report\Report_AspxCsTemplate.cs">
@@ -121,6 +123,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>MasterPage_JavascriptTemplate.tt</DependentUpon>
     </Compile>
+    <Compile Include="HtmlTag\HtmlTag_QueryCtrl.cs" />
     <Compile Include="OracleSchema.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectSqlGenerator.cs" />
